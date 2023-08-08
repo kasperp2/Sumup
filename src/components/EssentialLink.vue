@@ -1,7 +1,12 @@
 <template>
-  <q-item clickable tag="a" target="_blank" :href="link">
+  <q-item clickable tag="a" :href="link">
     <q-item-section v-if="icon" avatar>
-      <q-icon :name="icon" />
+      <q-icon v-if="type == 'icon'" :name="icon" />
+      <q-img
+        v-else-if="type == 'img'"
+        :src="icon"
+        style="height: 25px; max-width: 25px"
+      />
     </q-item-section>
 
     <q-item-section>
@@ -33,6 +38,11 @@ export default defineComponent({
     },
 
     icon: {
+      type: String,
+      default: '',
+    },
+
+    type: {
       type: String,
       default: '',
     },
