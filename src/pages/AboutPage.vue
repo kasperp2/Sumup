@@ -1,37 +1,25 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <!-- center q-page using tailwindcss -->
+  <q-page class="mt-8">
+    <div class="flex-row space-y-4">
+      <CardComponent
+        title="Who are we?"
+        caption="We are a company that specializes in summarizing long speeches into short, digestible topics."
+      />
+      <CardComponent
+        title="What are we hoping to achieve?"
+        caption="We are hoping to make it easier for people to understand long speeches by summarizing them into short, digestible topics."
+      />
+    </div>
   </q-page>
 </template>
 
 <script lang="ts">
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
+import CardComponent from 'components/CardComponent.vue';
 
 export default defineComponent({
   name: 'AboutPage',
-  components: { ExampleComponent },
-  setup() {
-    const todos = ref<Todo[]>([
-      {
-        id: 1,
-        content: 'ct1',
-      },
-      {
-        id: 2,
-        content: 'ct2',
-      },
-    ]);
-    const meta = ref<Meta>({
-      totalCount: 1200,
-    });
-    return { todos, meta };
-  },
+  components: { CardComponent },
 });
 </script>
