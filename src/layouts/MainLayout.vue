@@ -45,12 +45,21 @@ const linksList = [
     caption: 'The starting point',
     icon: 'home',
     link: 'https://quasar.dev',
+    type: 'icon',
   },
   {
     title: 'SumUps',
     caption: 'Your SumUps',
-    icon: 'home',
+    icon: '/src/assets/logo.png',
     link: 'https://quasar.dev',
+    type: 'img',
+  },
+  {
+    title: 'About',
+    caption: 'About SumUp',
+    icon: 'info',
+    link: 'https://quasar.dev',
+    type: 'icon',
   },
 ];
 
