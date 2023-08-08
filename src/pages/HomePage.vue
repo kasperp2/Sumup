@@ -1,17 +1,15 @@
 <template>
-  <!-- center container -->
-<div class="container row justify-center">
-  <div class="col">
-    <q-img
-    :src="url"
-    spinner-color="white"
-    style="height: 140px; max-width: 150px"
-    />
-  </div>
-  <div class="col ">
-    sumup
-  </div>
-</div>
+  <q-page class="row items-center justify-evenly">
+      <q-img
+      class=""
+      :src="url"
+      style="height: 140px; max-width: 150px"
+      />
+      <div class="text-h1">
+        Sumup
+      </div>
+
+  </q-page>
 </template>
 
 <script lang="ts">
