@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lFf Lpr lFf">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -10,17 +10,30 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title>{{ pageStore.heder }}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
+    <q-footer bordered class="bg-grey-3 text-primary">
+      <q-tabs
+        no-caps
+        active-color="primary"
+        indicator-color="transparent"
+        class="text-grey-8"
+        v-model="tab"
+      >
+        <q-tab icon="home" label="home" link="https://quasar.dev" />
+
+        <q-tab
+          icon="keyboard_voice"
+          label="Recorder"
+          link="https://quasar.dev"
+        />
+      </q-tabs>
+    </q-footer>
+
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Menu </q-item-label>
-
         <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
@@ -38,6 +51,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import EssentialLink from 'components/EssentialLink.vue';
+import { usePageStore } from 'src/stores/page';
 
 const linksList = [
   {
@@ -72,6 +86,7 @@ export default defineComponent({
 
   setup() {
     const leftDrawerOpen = ref(false);
+    const pageStore = usePageStore();
 
     return {
       essentialLinks: linksList,
@@ -79,6 +94,7 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
+      pageStore,
     };
   },
 });
