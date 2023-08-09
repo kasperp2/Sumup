@@ -14,6 +14,10 @@
       </q-toolbar>
     </q-header>
 
+
+    <router-link to="/record" class="record-btn"/>
+    <div class="bottom-bar"></div>
+
     <q-footer bordered class="bg-grey-3 text-primary">
       <q-tabs
         no-caps
@@ -22,7 +26,7 @@
         class="text-grey-8"
         v-model="tab"
       >
-        <q-tab icon="home" label="home" link="https://quasar.dev" />
+        <q-route-tab icon="home" label="home" to="/" exact/>
 
         <q-tab
           icon="keyboard_voice"
@@ -99,3 +103,36 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped lang="scss">
+// variable
+$size: 100px;
+$pos: 40px;
+$bar-color: rgb(208,216,223);
+.record-btn {
+  width: $size;
+  height: $size;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%);
+  bottom: $pos;
+  z-index: 2001;
+
+  background-color: rgb(195,80,94);
+  border-radius: 50%;
+  border: 2px solid rgb(154, 61, 72);
+  box-shadow: 0 0 0 20px $footer-color;
+}
+
+// for future o:
+.bottom-bar {
+  width: 100%;
+  height: $pos + 40px;
+  background-color: $footer-color; // TODO: bottom nav color
+  position: fixed;
+  bottom: 0;
+
+  display:none;
+}
+</style>
