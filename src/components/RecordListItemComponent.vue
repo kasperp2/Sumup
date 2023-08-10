@@ -11,7 +11,7 @@ import { defineComponent} from 'vue';
 
 
 export default defineComponent({
-  name: 'ExampleComponent',
+  name: 'RecordListItemComponent',
   props: {
     title: {
       type: String,

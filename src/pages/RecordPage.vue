@@ -20,7 +20,7 @@ import { usePageStore } from 'src/stores/page';
 
 
 export default defineComponent({
-  name: 'IndexPage',
+  name: 'RecordPage',
   components: { RecordListItem },
   setup() {
     // Change top bar title
