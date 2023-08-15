@@ -1,51 +1,5 @@
 <template>
   <q-layout view="lFf Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-        <q-toolbar-title>{{ pageStore.heder }}</q-toolbar-title>
-      </q-toolbar>
-    </q-header>
-
-
-    <router-link to="/record" class="record-btn"/>
-    <div class="bottom-bar"></div>
-
-    <q-footer bordered class="bg-grey-3 text-primary">
-      <q-tabs
-        no-caps
-        active-color="primary"
-        indicator-color="transparent"
-        class="text-grey-8"
-        v-model="tab"
-      >
-        <q-route-tab icon="home" label="home" to="/" exact/>
-
-        <q-tab
-          icon="keyboard_voice"
-          label="Recorder"
-          link="https://quasar.dev"
-        />
-      </q-tabs>
-    </q-footer>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -84,20 +38,10 @@ const linksList = [
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-    EssentialLink,
-  },
-
   setup() {
-    const leftDrawerOpen = ref(false);
     const pageStore = usePageStore();
 
     return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
       pageStore,
     };
   },
@@ -108,7 +52,7 @@ export default defineComponent({
 // variable
 $size: 100px;
 $pos: 40px;
-$bar-color: rgb(208,216,223);
+$bar-color: rgb(208, 216, 223);
 .record-btn {
   width: $size;
   height: $size;
@@ -119,7 +63,7 @@ $bar-color: rgb(208,216,223);
   bottom: $pos;
   z-index: 2001;
 
-  background-color: rgb(195,80,94);
+  background-color: rgb(195, 80, 94);
   border-radius: 50%;
   border: 2px solid rgb(154, 61, 72);
   box-shadow: 0 0 0 20px $footer-color;
@@ -133,6 +77,6 @@ $bar-color: rgb(208,216,223);
   position: fixed;
   bottom: 0;
 
-  display:none;
+  display: none;
 }
 </style>
