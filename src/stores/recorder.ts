@@ -1,5 +1,5 @@
-import { log } from 'console';
 import { defineStore } from 'pinia';
+import axios from 'axios'
 
 export const useRecorderStore = defineStore('recorder', {
   state: () => ({
@@ -55,6 +55,10 @@ export const useRecorderStore = defineStore('recorder', {
       if (this.recognition == null) return
       this.isListining = false
       this.recognition.stop()
+    },
+
+    async save() {
+      console.log('save')
     }
   },
 });
