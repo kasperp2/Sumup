@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lFf Lpr lFf">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -10,17 +10,32 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-toolbar-title></q-toolbar-title>
       </q-toolbar>
     </q-header>
 
+    <component to="/record" class="record-btn" :is="onRecordPage ? 'span' : 'router-link'" @click="clickRecord"/>
+    <div class="bottom-bar"></div>
+
+    <q-footer bordered class="bg-grey-3 text-primary">
+      <q-tabs
+        no-caps
+        active-color="primary"
+        indicator-color="transparent"
+        class="text-grey-8"
+      >
+        <q-route-tab icon="home" label="home" to="/" exact/>
+
+        <q-tab
+          icon="keyboard_voice"
+          label="Recorder"
+          link="https://quasar.dev"
+        />
+      </q-tabs>
+    </q-footer>
+
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Menu </q-item-label>
-
         <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
@@ -38,6 +53,9 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import EssentialLink from 'components/EssentialLink.vue';
+import { usePageStore } from 'src/stores/page';
+import { useRecorderStore } from 'src/stores/recorder';
+
 
 const linksList = [
   {
@@ -70,8 +88,29 @@ export default defineComponent({
     EssentialLink,
   },
 
+  computed: {
+    onRecordPage(){return this.$route.path == '/record'},
+    recorder(){return useRecorderStore()},
+    clickRecord(){
+      if(this.onRecordPage){
+        if(this.recorder.isListining){
+          return this.recorder.stop
+        }
+        else{
+          return this.recorder.start
+        }
+      }
+      else {
+        return null
+      }
+    }
+  },
+
   setup() {
     const leftDrawerOpen = ref(false);
+    const pageStore = usePageStore();
+
+    useRecorderStore().createRecognition('da-DK')
 
     return {
       essentialLinks: linksList,
@@ -79,7 +118,41 @@ export default defineComponent({
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
+      pageStore,
     };
   },
 });
 </script>
+
+<style scoped lang="scss">
+// variable
+$size: 100px;
+$pos: 40px;
+$bar-color: rgb(208,216,223);
+.record-btn {
+  width: $size;
+  height: $size;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%);
+  bottom: $pos;
+  z-index: 2001;
+
+  background-color: rgb(195,80,94);
+  border-radius: 50%;
+  border: 2px solid rgb(154, 61, 72);
+  box-shadow: 0 0 0 20px $footer-color;
+}
+
+// for future o:
+.bottom-bar {
+  width: 100%;
+  height: $pos + 40px;
+  background-color: $footer-color; // TODO: bottom nav color
+  position: fixed;
+  bottom: 0;
+
+  display:none;
+}
+</style>
