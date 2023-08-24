@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import axios from 'axios'
+import { api } from 'boot/axios'
+
 
 export const useRecorderStore = defineStore('recorder', {
   state: () => ({
@@ -58,7 +59,14 @@ export const useRecorderStore = defineStore('recorder', {
     },
 
     async save() {
-      console.log('save')
+      const { data } = await api.post('/api/transcript', {
+        userId: 1,
+        name: 'test',
+        content: this.words,
+      })
+
+      console.log(data);
+      this.words = ''
     }
   },
 });
