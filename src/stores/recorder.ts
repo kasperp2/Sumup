@@ -6,6 +6,7 @@ export const useRecorderStore = defineStore('recorder', {
   state: () => ({
     words: '',
     interim: '',
+    name: '',
     isListining: false,
     recognition: null as SpeechRecognition | null,
     error: '',
@@ -19,6 +20,8 @@ export const useRecorderStore = defineStore('recorder', {
       this.recognition.continuous = true
       this.recognition.lang = lang
       this.recognition.interimResults = true
+
+      this.clear()
 
       this.recognition.onresult = (event) => {
         const current = event.resultIndex
@@ -35,6 +38,8 @@ export const useRecorderStore = defineStore('recorder', {
       }
 
       this.recognition.onerror = (event) => {
+        if(event.error === 'no-speech') return
+
         this.isListining = false
         this.error = event.error
       }
@@ -48,7 +53,6 @@ export const useRecorderStore = defineStore('recorder', {
     start() {
       if (this.recognition == null) return
       this.isListining = true
-      console.log('start');
       this.recognition.start()
     },
 
@@ -58,15 +62,20 @@ export const useRecorderStore = defineStore('recorder', {
       this.recognition.stop()
     },
 
+    clear() {
+      this.words = ''
+      this.interim = ''
+      this.name = new Date().toISOString().slice(0, 10)
+    },
+
     async save() {
-      const { data } = await api.post('/api/transcript', {
+      await api.post('/api/transcript', {
         userId: 1,
-        name: 'test',
+        name: this.name,
         content: this.words,
       })
 
-      console.log(data);
-      this.words = ''
+      this.clear()
     }
   },
 });
