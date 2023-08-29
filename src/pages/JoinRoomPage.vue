@@ -42,7 +42,7 @@ export default defineComponent({
       const newRoom = await connect(token, {
         name: roomName,
       });
-      room.value = newRoom;
+      room = newRoom;
       return newRoom;
     };
 
@@ -133,7 +133,7 @@ export default defineComponent({
     };
 
     const disconnectRoom = () => {
-      room.value.disconnect();
+      room.disconnect();
       router.push('/');
     };
 
