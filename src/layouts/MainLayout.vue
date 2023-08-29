@@ -13,16 +13,20 @@
         <q-toolbar-title></q-toolbar-title>
       </q-toolbar>
     </q-header>
-
+    
     <component
       to="/record"
       class="record-btn"
       :is="onRecordPage ? 'span' : 'router-link'"
       @click="clickRecord"
     />
+    
     <div class="bottom-bar"></div>
-
     <q-footer bordered class="bg-grey-3 text-primary">
+      <component to="/record" :class="{'record-btn':true, 'recording':recorder.isListining}" :is="onRecordPage ? 'span' : 'router-link'" @click="clickRecord">
+          <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
+      </component>
+
       <q-tabs
         no-caps
         active-color="primary"
@@ -30,6 +34,9 @@
         class="text-grey-8"
       >
         <q-route-tab icon="home" label="home" to="/" exact />
+
+        <!-- hidden when in desktop -->
+        <q-tab class="q-tab-record"></q-tab>
 
         <q-tab
           icon="keyboard_voice"
@@ -123,6 +130,53 @@ export default defineComponent({
 
     useRecorderStore().createRecognition('da-DK');
 
+    // type ref soundBars
+    const soundBars = ref<number[]>([])
+
+    const resetSoundBars = () => {
+      soundBars.value = []
+      for (let i = 0; i < 10; i++) {
+        soundBars.value.push(0)
+      }
+    }
+
+    resetSoundBars()
+
+
+    navigator.mediaDevices.getUserMedia({audio: true,})
+      .then((stream) => {
+        const audioContext = new AudioContext();
+        const analyser = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 1024;
+
+        microphone.connect(analyser);
+        analyser.connect(scriptProcessor);
+        scriptProcessor.connect(audioContext.destination);
+        scriptProcessor.onaudioprocess = () => {
+          if(!useRecorderStore().isListining) {
+            resetSoundBars()
+            return
+          }
+
+          const array = new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(array);
+          const arraySum = array.reduce((a, value) => a + value, 0);
+          const average = arraySum / array.length;
+
+          let value = Math.round(average + 2)
+          value = value > 100 ? 100 : value
+
+          soundBars.value.push(value);
+          soundBars.value.shift();
+        };
+      })
+
+
+
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
@@ -130,6 +184,7 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       pageStore,
+      soundBars
     };
   },
 });
@@ -143,7 +198,7 @@ $bar-color: rgb(208, 216, 223);
 .record-btn {
   width: $size;
   height: $size;
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 50%;
   transform: translate(-50%);
@@ -154,16 +209,44 @@ $bar-color: rgb(208, 216, 223);
   border-radius: 50%;
   border: 2px solid rgb(154, 61, 72);
   box-shadow: 0 0 0 20px $footer-color;
+
+  // center children vertically and horizontally
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: all 0.4s ease-in-out;
 }
 
-// for future o:
-.bottom-bar {
-  width: 100%;
-  height: $pos + 40px;
-  background-color: $footer-color; // TODO: bottom nav color
-  position: fixed;
-  bottom: 0;
-
-  display: none;
+.record-btn.recording {
+  width: $size + 10px;
+  height: $size + 10px;
+  bottom: $pos - 5px;
+  box-shadow: 0 0 0 20px rgb(154, 61, 72);
 }
+
+.q-tab-record {
+  display:none;
+
+}
+@media (min-width: 600px) {
+  .q-tab-record {
+    display: block;
+    width: $size + 50px;
+  }
+}
+
+
+.sound-bar {
+  width: 5px;
+  background-color: $bar-color;
+  margin: 0 2px;
+  border-radius: 2px;
+  background-color: white;
+
+  // animation
+  transition: height 0.1s ease-in-out;
+}
+
+
 </style>
