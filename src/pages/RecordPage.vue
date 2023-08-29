@@ -8,16 +8,13 @@
     <br>
 
     <q-scroll-area style="height: 500px; max-width: 100%;">
-      <RecordListItem
-      v-for="item in items"
-      :key="item.id"
-      :title="item.title"
-      :date="item.date"
-      class="mb-4"
-      />
+      <div>
+        <RecordListItem v-for="item in items" :key="item.id" :title="item.title" :date="item.date" class="mb-4"
+          @click="redirectToDetails(item.title)" />
+      </div>
     </q-scroll-area>
-  </div>
 
+  </div>
 </template>
 
 <script lang="ts">
@@ -45,7 +42,7 @@ export default defineComponent({
     for (let i = 0; i < 10; i++) {
       items.value.push({
         id: i,
-        title: `Title ${i}`,
+        title: `title ${i}`,
         date: `Date ${i}`,
       })
 
@@ -64,6 +61,11 @@ export default defineComponent({
       recorder,
     }
   },
+  methods: {
+    redirectToDetails(title: string) {
+      this.$router.push({ name: 'record_details', params: { title: title } });
+    }
+  }
 });
 </script>
 
