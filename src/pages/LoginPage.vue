@@ -59,8 +59,6 @@ export default defineComponent({
           router.push('/');
         })
         .catch((error) => {
-          console.log(error);
-
           if (error.response.data.status === 'failed') {
             if (error.response.data.errorCode === 'FAILED_TO_FETCH_USER') {
               errorMessage.value = 'Wrong Password or Username'; // Update error message
