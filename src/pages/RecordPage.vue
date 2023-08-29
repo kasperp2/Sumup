@@ -1,5 +1,10 @@
 <template>
   <div class="p-5">
+    <h3>Transcript</h3>
+    {{ recorder.current }}
+    <br>
+    <br>
+
     <q-scroll-area style="height: 500px; max-width: 100%;">
       <RecordListItem
       v-for="item in items"
@@ -17,7 +22,7 @@
 import { defineComponent, ref } from 'vue';
 import RecordListItem from '/src/components/RecordListItemComponent.vue';
 import { usePageStore } from 'src/stores/page';
-
+import { useRecorderStore } from 'src/stores/recorder';
 
 export default defineComponent({
   name: 'RecordPage',
@@ -49,7 +54,13 @@ export default defineComponent({
       console.log('load')
     }
 
-    return {items, onLoad}
+    // AUDIO RECORDING
+    const recorder = useRecorderStore()
+    return {
+      items,
+      onLoad,
+      recorder
+    }
   },
 });
 </script>

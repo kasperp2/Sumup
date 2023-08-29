@@ -21,26 +21,27 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { usePageStore } from 'src/stores/page';
-import axios from 'axios';
+import { api } from 'src/boot/axios';
+import { Cookies } from 'quasar';
+import { useRouter } from 'vue-router'; // Import the useRouter function
 
 export default defineComponent({
   name: 'LoginPage',
   components: {},
   setup() {
-    // Change top bar title
-    usePageStore().heder = 'Login';
-
     const url = '/src/assets/logo.png';
+
     let username = ref('');
     let password = ref('');
+
+    const router = useRouter(); // Get the router instance
 
     let errorMessage = ref('');
 
     function login() {
       console.log(username.value, password.value);
-      axios
-        .get('http://pi.local:3000/api/login', {
+      api
+        .get('/api/login', {
           params: {
             username: username.value,
             password: password.value,
@@ -49,10 +50,13 @@ export default defineComponent({
           headers: {
             'Content-Type': 'application/json',
           },
-          baseURL: 'http://localhost:3000',
         })
         .then((response) => {
-          console.log(response);
+          console.log(response.data);
+          Cookies.set('token', response.data.token);
+
+          // Redirect to home page using router
+          router.push('/');
         })
         .catch((error) => {
           console.log(error);
@@ -72,6 +76,11 @@ export default defineComponent({
     }
 
     return { url, username, password, login, errorMessage };
+  },
+  methods: {
+    redirectToHome() {
+      return this.$route.path == '/';
+    },
   },
 });
 </script>

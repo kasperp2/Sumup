@@ -10,12 +10,11 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title>{{ pageStore.heder }}</q-toolbar-title>
+        <q-toolbar-title></q-toolbar-title>
       </q-toolbar>
     </q-header>
 
-
-    <router-link to="/record" class="record-btn"/>
+    <component to="/record" class="record-btn" :is="onRecordPage ? 'span' : 'router-link'" @click="clickRecord"/>
     <div class="bottom-bar"></div>
 
     <q-footer bordered class="bg-grey-3 text-primary">
@@ -24,7 +23,6 @@
         active-color="primary"
         indicator-color="transparent"
         class="text-grey-8"
-        v-model="tab"
       >
         <q-route-tab icon="home" label="home" to="/" exact/>
 
@@ -56,6 +54,8 @@
 import { defineComponent, ref } from 'vue';
 import EssentialLink from 'components/EssentialLink.vue';
 import { usePageStore } from 'src/stores/page';
+import { useRecorderStore } from 'src/stores/recorder';
+
 
 const linksList = [
   {
@@ -88,9 +88,29 @@ export default defineComponent({
     EssentialLink,
   },
 
+  computed: {
+    onRecordPage(){return this.$route.path == '/record'},
+    recorder(){return useRecorderStore()},
+    clickRecord(){
+      if(this.onRecordPage){
+        if(this.recorder.isListining){
+          return this.recorder.stop
+        }
+        else{
+          return this.recorder.start
+        }
+      }
+      else {
+        return null
+      }
+    }
+  },
+
   setup() {
     const leftDrawerOpen = ref(false);
     const pageStore = usePageStore();
+
+    useRecorderStore().createRecognition('da-DK')
 
     return {
       essentialLinks: linksList,
