@@ -2,7 +2,7 @@
   <q-page class="flex flex-row md:flex-col items-center justify-evenly">
     <div class="flex flex-row items-center justify-center">
       <img :src="url" class="w-32 h-32" />
-      <div class="text-h1">Sumup</div>
+      <div class="text-h1">MeetBrief</div>
     </div>
 
     <div id="video-container"></div>
@@ -10,6 +10,7 @@
     <div class="flex flex-col gap-2">
       <q-input filled v-model="roomName" label="Room Name:" />
       <q-btn @click="joinRoom" label="Join room" class="w-64" />
+      <q-btn @click="disconnectRoom" label="Disconnect room" class="w-64" />
     </div>
   </q-page>
 </template>
@@ -25,47 +26,23 @@ export default defineComponent({
   name: 'JoinRoomPage',
   components: {},
   setup() {
-    let container = null;
+    let container = null as any;
     onMounted(() => {
       container = document.getElementById('video-container') as HTMLElement;
     });
     const url = '/src/assets/logo.png';
 
     let roomName = ref('');
+    let room = ref(null) as any;
 
     const router = useRouter(); // Get the router instance
 
-    const connectRoom = (roomName: string, token: any) => {
-      connect(token, {
+    const connectRoom = async (roomName: string, token: any) => {
+      const newRoom = await connect(token, {
         name: roomName,
-      }).then((room: any) => {
-        console.log(`Successfully joined a Room: ${room}`);
-        room.participants.forEach((participant: any) => {
-          console.log(
-            `Participant "${participant.identity}" is connected to the Room`
-          );
-        });
-
-        // Log your Client's LocalParticipant in the Room
-        const localParticipant = room.localParticipant;
-        console.log(
-          `Connected to the Room as LocalParticipant "${localParticipant.identity}"`
-        );
-        handleConnectedParticipant(localParticipant);
-
-        // Log any Participants already connected to the Room
-        room.participants.forEach(handleConnectedParticipant);
-
-        // Log new Participants as they connect to the Room
-        room.on('participantConnected', handleConnectedParticipant);
-
-        // Log Participants as they disconnect from the Room
-        room.on('participantDisconnected', (participant: any) => {
-          console.log(
-            `Participant "${participant.identity}" has disconnected from the Room`
-          );
-        });
       });
+      room = newRoom;
+      return newRoom;
     };
 
     const handleConnectedParticipant = (participant: any) => {
@@ -108,7 +85,17 @@ export default defineComponent({
       trackPublication.on('subscribed', displayTrack);
     };
 
-    const joinRoom = () => {
+    const handleDisconnectedParticipant = (participant: any) => {
+      // stop listening for this participant
+      participant.removeAllListeners();
+      // remove this participant's div from the page
+      const participantDiv = document.getElementById(
+        participant.identity
+      ) as HTMLElement;
+      participantDiv.remove();
+    };
+
+    const joinRoom = async () => {
       api
         .get('/api/joinRoom', {
           params: {
@@ -120,18 +107,34 @@ export default defineComponent({
           },
         })
         .then((response) => {
-          console.log(response.data);
           localStorage.setItem('TwilioToken', response.data.twilioToken);
-
-          // find or create a room with the given roomName
-          connectRoom(roomName.value, response.data.twilioToken);
         })
         .catch((error) => {
           console.log('Error', error.response);
         });
+
+      // find or create a room with the given roomName
+      const room = await connectRoom(
+        roomName.value,
+        localStorage.getItem('TwilioToken')
+      );
+
+      // render the local and remote participants' video and audio tracks
+      handleConnectedParticipant(room.localParticipant);
+      room.participants.forEach(handleConnectedParticipant);
+      room.on('participantConnected', handleConnectedParticipant);
+
+      // handle cleanup when a participant disconnects
+      room.on('participantDisconnected', handleDisconnectedParticipant);
+      window.addEventListener('beforeunload', () => room.disconnect());
     };
 
-    return { url, roomName, joinRoom };
+    const disconnectRoom = () => {
+      room.disconnect();
+      router.push('/');
+    };
+
+    return { url, roomName, joinRoom, disconnectRoom };
   },
   methods: {
     redirectToHome() {
