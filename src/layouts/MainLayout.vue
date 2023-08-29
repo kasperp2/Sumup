@@ -13,7 +13,15 @@
         <q-toolbar-title></q-toolbar-title>
       </q-toolbar>
     </q-header>
-
+    
+    <component
+      to="/record"
+      class="record-btn"
+      :is="onRecordPage ? 'span' : 'router-link'"
+      @click="clickRecord"
+    />
+    
+    <div class="bottom-bar"></div>
     <q-footer bordered class="bg-grey-3 text-primary">
       <component to="/record" :class="{'record-btn':true, 'recording':recorder.isListining}" :is="onRecordPage ? 'span' : 'router-link'" @click="clickRecord">
           <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
@@ -25,7 +33,7 @@
         indicator-color="transparent"
         class="text-grey-8"
       >
-        <q-route-tab icon="home" label="home" to="/" exact/>
+        <q-route-tab icon="home" label="home" to="/" exact />
 
         <!-- hidden when in desktop -->
         <q-tab class="q-tab-record"></q-tab>
@@ -60,27 +68,33 @@ import EssentialLink from 'components/EssentialLink.vue';
 import { usePageStore } from 'src/stores/page';
 import { useRecorderStore } from 'src/stores/recorder';
 
-
 const linksList = [
   {
     title: 'Home',
     caption: 'The starting point',
     icon: 'home',
-    link: 'https://quasar.dev',
+    link: '/',
     type: 'icon',
   },
   {
     title: 'SumUps',
     caption: 'Your SumUps',
     icon: '/src/assets/logo.png',
-    link: 'https://quasar.dev',
+    link: '/record',
     type: 'img',
   },
   {
     title: 'About',
     caption: 'About SumUp',
     icon: 'info',
-    link: 'https://quasar.dev',
+    link: '/about',
+    type: 'icon',
+  },
+  {
+    title: 'My Account',
+    caption: 'Account information',
+    icon: 'info',
+    link: '/myaccount',
     type: 'icon',
   },
 ];
@@ -93,28 +107,28 @@ export default defineComponent({
   },
 
   computed: {
-    onRecordPage(){return this.$route.path == '/record'},
-    recorder(){return useRecorderStore()},
-    clickRecord(){
-      if(this.onRecordPage){
-        if(this.recorder.isListining){
-          return this.recorder.stop
-        }
-        else{
-          return this.recorder.start
-        }
+    onRecordPage() {
+      return this.$route.path == '/record';
+    },
+    recorder() {
+      return useRecorderStore();
+    },
+    clickRecord() {
+      if (this.onRecordPage) {
+        return this.recorder.isListining
+          ? this.recorder.stop
+          : this.recorder.start;
+      } else {
+        return null;
       }
-      else {
-        return null
-      }
-    }
+    },
   },
 
   setup() {
     const leftDrawerOpen = ref(false);
     const pageStore = usePageStore();
 
-    useRecorderStore().createRecognition('da-DK')
+    useRecorderStore().createRecognition('da-DK');
 
     // type ref soundBars
     const soundBars = ref<number[]>([])
@@ -180,7 +194,7 @@ export default defineComponent({
 // variable
 $size: 100px;
 $pos: 40px;
-$bar-color: rgb(208,216,223);
+$bar-color: rgb(208, 216, 223);
 .record-btn {
   width: $size;
   height: $size;
@@ -191,7 +205,7 @@ $bar-color: rgb(208,216,223);
   bottom: $pos;
   z-index: 2001;
 
-  background-color: rgb(195,80,94);
+  background-color: rgb(195, 80, 94);
   border-radius: 50%;
   border: 2px solid rgb(154, 61, 72);
   box-shadow: 0 0 0 20px $footer-color;
@@ -213,6 +227,7 @@ $bar-color: rgb(208,216,223);
 
 .q-tab-record {
   display:none;
+
 }
 @media (min-width: 600px) {
   .q-tab-record {
