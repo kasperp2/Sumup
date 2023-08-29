@@ -2,7 +2,7 @@
   <q-page class="flex flex-row md:flex-col items-center justify-evenly">
     <div class="flex flex-row items-center justify-center">
       <img :src="url" class="w-32 h-32" />
-      <div class="text-h1">Sumup</div>
+      <div class="text-h1">Meetbrief</div>
     </div>
 
     <div id="video-container"></div>
@@ -106,8 +106,7 @@ export default defineComponent({
             Authorization: 'Bearer ' + Cookies.get('token'),
           },
         })
-        .then(async (response) => {
-          console.log(response.data);
+        .then((response) => {
           localStorage.setItem('TwilioToken', response.data.twilioToken);
         })
         .catch((error) => {
