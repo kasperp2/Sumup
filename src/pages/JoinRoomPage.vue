@@ -11,6 +11,7 @@
       <q-input filled v-model="roomName" label="Room Name:" />
       <q-btn @click="joinRoom" label="Join room" class="w-64" />
       <q-btn @click="disconnectRoom" label="Disconnect room" class="w-64" />
+      <q-btn @click="createAndJoinRoom" label="Create room" class="w-64" />
     </div>
   </q-page>
 </template>
@@ -37,10 +38,21 @@ export default defineComponent({
 
     const router = useRouter(); // Get the router instance
 
-    const connectRoom = async (roomName: string, token: any) => {
-      const newRoom = await connect(token, {
-        name: roomName,
-      });
+    const connectRoom = async (
+      roomName: string,
+      uniqueName: string,
+      token: any
+    ) => {
+      let newRoom = null;
+      if (!uniqueName) {
+        newRoom = await connect(token, {
+          name: roomName,
+        });
+      } else if (uniqueName) {
+        newRoom = await connect(token, {
+          name: uniqueName,
+        });
+      }
       room = newRoom;
       return newRoom;
     };
@@ -95,29 +107,30 @@ export default defineComponent({
       participantDiv.remove();
     };
 
-    const joinRoom = async () => {
-      if (!localStorage.getItem('TwilioToken')) {
-        await api
-          .get('/api/joinRoom', {
-            params: {
-              roomName: roomName.value,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + Cookies.get('token'),
-            },
-          })
-          .then((response) => {
-            localStorage.setItem('TwilioToken', response.data.twilioToken);
-          })
-          .catch((error) => {
-            console.log('Error', error.response);
-          });
-      }
+    const joinRoom = async (uniqueName: string) => {
+      // if (!localStorage.getItem('TwilioToken')) {
+      await api
+        .get('/api/joinRoom', {
+          params: {
+            roomName: uniqueName || roomName.value,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + Cookies.get('token'),
+          },
+        })
+        .then((response) => {
+          localStorage.setItem('TwilioToken', response.data.twilioToken);
+        })
+        .catch((error) => {
+          console.log('Error', error.response);
+        });
+      // }
 
       // find or create a room with the given roomName
       const room = await connectRoom(
         roomName.value,
+        uniqueName,
         localStorage.getItem('TwilioToken')
       );
 
@@ -136,7 +149,30 @@ export default defineComponent({
       router.push('/');
     };
 
-    return { url, roomName, joinRoom, disconnectRoom };
+    const createAndJoinRoom = async () => {
+      await api
+        .post(
+          '/api/createRoom',
+          {
+            roomName: roomName.value,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + Cookies.get('token'),
+            },
+          }
+        )
+        .then(async (response) => {
+          console.log(response);
+          await joinRoom(response.data.room as string);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    return { url, roomName, joinRoom, disconnectRoom, createAndJoinRoom };
   },
   methods: {
     redirectToHome() {
