@@ -2,7 +2,7 @@
   <q-page class="flex flex-row md:flex-col items-center justify-evenly">
     <div class="flex flex-row items-center justify-center">
       <img :src="url" class="w-32 h-32" />
-      <div class="text-h1">Meetbrief</div>
+      <div class="text-h1">MeetBrief</div>
     </div>
 
     <div id="video-container"></div>
