@@ -6,8 +6,14 @@
     </div>
 
     <div class="flex flex-col gap-2">
+      <span class="text-sm" style="color: red">{{ errorMessage }}</span>
       <q-input filled v-model="username" label="Username" />
-      <q-input filled v-model="password" label="Password" />
+      <q-input
+        filled
+        v-model="password"
+        label="Password"
+        @keyup.enter="login"
+      />
       <q-btn @click="login" label="Login" class="w-64" />
     </div>
   </q-page>
@@ -29,10 +35,12 @@ export default defineComponent({
     let username = ref('');
     let password = ref('');
 
+    let errorMessage = ref('');
+
     function login() {
       console.log(username.value, password.value);
       axios
-        .get('http://localhost:3000/api/login', {
+        .get('http://pi.local:3000/api/login', {
           params: {
             username: username.value,
             password: password.value,
@@ -45,10 +53,25 @@ export default defineComponent({
         })
         .then((response) => {
           console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+
+          if (error.response.data.status === 'failed') {
+            if (error.response.data.errorCode === 'FAILED_TO_FETCH_USER') {
+              errorMessage.value = 'Wrong Password or Username'; // Update error message
+            } else if (error.response.data.errorCode === 'BAD_CREDENTIALS') {
+              errorMessage.value = 'Wrong Password or Username'; // Update error message
+            } else if (error.response.data.errorCode === 'NO_USER') {
+              errorMessage.value = 'Wrong Password or Username'; // Update error message
+            } else {
+              errorMessage.value = 'Unknown error'; // Update error message
+            }
+          }
         });
     }
 
-    return { url, username, password, login };
+    return { url, username, password, login, errorMessage };
   },
 });
 </script>
