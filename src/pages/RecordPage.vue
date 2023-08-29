@@ -3,6 +3,8 @@
     <h3>Transcript</h3>
     {{ recorder.current }}
     <br>
+    <q-btn @click="recorder.save()">post</q-btn>
+    <br>
     <br>
 
     <q-scroll-area style="height: 500px; max-width: 100%;">
@@ -59,7 +61,7 @@ export default defineComponent({
     return {
       items,
       onLoad,
-      recorder
+      recorder,
     }
   },
 });
