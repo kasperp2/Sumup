@@ -20,14 +20,13 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
-import { Room, connect } from 'twilio-video';
-import { disconnect } from 'process';
+import { connect } from 'twilio-video';
 
 export default defineComponent({
   name: 'JoinRoomPage',
   components: {},
   setup() {
-    let container = null;
+    let container = null as any;
     onMounted(() => {
       container = document.getElementById('video-container') as HTMLElement;
     });
@@ -87,7 +86,6 @@ export default defineComponent({
     };
 
     const handleDisconnectedParticipant = (participant: any) => {
-      console.log('participantDiv');
       // stop listening for this participant
       participant.removeAllListeners();
       // remove this participant's div from the page
