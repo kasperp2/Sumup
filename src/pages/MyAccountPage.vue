@@ -3,7 +3,7 @@
     <div class="flex flex-col items-center mt-4">
       <div class="text-h4">My Account</div>
       <div class="text-h5 mt-2">{{ username }}</div>
-      <q-input filled v-model="email" label="Email" class="w-64" />
+      <q-input filled v-model="email" type="email" label="Email" class="w-64" />
       <q-expansion-item
         v-model="expanded"
         icon="key"
@@ -36,6 +36,7 @@
           icon-right="send"
           label="Change password"
           class="w-full mt-2"
+          @click="updateInformation"
         />
       </q-expansion-item>
     </div>
@@ -43,6 +44,7 @@
 </template>
 
 <script lang="ts">
+import { api } from 'src/boot/axios';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
@@ -56,6 +58,36 @@ export default defineComponent({
     const confirmPassword = ref('');
     const expanded = ref(false);
 
+    const updateInformation = () => {
+      if (email.value.trim() === '') {
+        console.log('Email is empty');
+      }
+
+      // check if email is valid
+      if (!email.value.includes('@') || !email.value.includes('.')) {
+        console.log('Email is invalid');
+      }
+
+      if (currentPassword.value.trim() === '') {
+        console.log('Current password is empty');
+      }
+
+      if (newPassword.value.trim() !== confirmPassword.value.trim()) {
+        console.log('New password and confirm password do not match');
+      }
+
+      // new password is optional
+      api.post('/api/update', {
+        email: email.value,
+        username: username.value,
+        currentPassword: currentPassword.value,
+        newPassword: newPassword.value,
+        confirmPassword: confirmPassword.value,
+      });
+
+      console.log('Updated information');
+    };
+
     return {
       email,
       username,
@@ -63,6 +95,7 @@ export default defineComponent({
       newPassword,
       confirmPassword,
       expanded,
+      updateInformation,
     };
   },
 });
