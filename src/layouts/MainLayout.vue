@@ -13,17 +13,14 @@
         <q-toolbar-title></q-toolbar-title>
       </q-toolbar>
     </q-header>
-    
-    <component
-      to="/record"
-      class="record-btn"
-      :is="onRecordPage ? 'span' : 'router-link'"
-      @click="clickRecord"
-    />
-    
-    <div class="bottom-bar"></div>
+
     <q-footer bordered class="bg-grey-3 text-primary">
-      <component to="/record" :class="{'record-btn':true, 'recording':recorder.isListining}" :is="onRecordPage ? 'span' : 'router-link'" @click="clickRecord">
+      <component
+        to="/record"
+        :class="{'record-btn':true, 'recording':recorder.isListining}"
+        :is="onRecordPage ? 'span' : 'router-link'"
+        @click="clickRecord"
+        >
           <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
       </component>
 

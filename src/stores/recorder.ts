@@ -8,7 +8,7 @@ export const useRecorderStore = defineStore('recorder', {
     interim: '',
     name: '',
     isListining: false,
-    recognition: null as SpeechRecognition | null,
+    recognition: null as webkitSpeechRecognition | null,
     error: '',
   }),
   getters: {
