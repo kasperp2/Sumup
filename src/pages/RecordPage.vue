@@ -31,6 +31,7 @@ export default defineComponent({
     usePageStore().heder = 'Record';
 
 
+
     interface Item {
       id: number;
       title: string;
@@ -38,7 +39,7 @@ export default defineComponent({
     }
 
     const items = ref<Item[]>([
-      { id: 1, title: 'Title 1', date: '2023-01-01' },
+      { id: 1, title: 'Title-1', date: '2023-01-01' },
       { id: 2, title: 'Title 2', date: '2023-02-15' },
       { id: 3, title: 'Title 3', date: '2023-03-20' },
       { id: 4, title: 'Title 4', date: '2023-04-10' },

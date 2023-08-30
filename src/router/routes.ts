@@ -21,11 +21,11 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     component: () => import('layouts/LoginLayout.vue'),
     children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
-  },{
+  },
+  {
     path: '/record_details/:title/:date',
-    name: 'record_details',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/RecordDetails.vue') }],
+    children: [{ name: 'record_details', path: '', component: () => import('pages/RecordDetails.vue') }],
   },
 
   

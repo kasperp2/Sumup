@@ -30,16 +30,23 @@
 
     </div>
 </template>
-<script>
-import { ref } from 'vue'
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 
 export default {
+    name: 'RecordDetails',
+    components: {},
     setup() {
         return {
             text: ref(''),
             ph: ref(''),
             dense: ref(false)
+
         }
+
+    },
+    mounted() {
+        console.log("jegersej")
     }
 }
 </script>
