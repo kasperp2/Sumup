@@ -9,28 +9,21 @@
 
     <div class="flex flex-col gap-2">
       <q-input filled v-model="roomName" label="Room Name:" />
-      <div class="q-pa-md">
-        <q-btn-dropdown color="primary" label="Dropdown Button">
-          <q-list>
-            <q-item clickable v-close-popup @click="onItemClick">
-              <q-item-section>
-                <q-item-label>Photos</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-close-popup @click="onItemClick">
-              <q-item-section>
-                <q-item-label>Videos</q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item clickable v-close-popup @click="onItemClick">
-              <q-item-section>
-                <q-item-label>Articles</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
+      <q-input filled v-model="maxParticipants" label="Max Participants:" />
+      <div>
+        <q-checkbox left-label v-model="audioOnly" label="Audio Only" />
+      </div>
+      <div class="q-pa-md" style="max-width: 350px">
+        <div class="q-gutter-md">
+          <q-select
+            outlined
+            v-model="roomType"
+            :options="groupTypes"
+            option-value="id"
+            option-label="desc"
+            label="Group Type:"
+          />
+        </div>
       </div>
       <q-btn @click="createAndJoinRoom" label="Create room" class="w-64" />
     </div>
@@ -49,15 +42,42 @@ export default defineComponent({
   components: {},
   setup() {
     const url = '/src/assets/logo.png';
+    const groupTypes = [
+      {
+        id: 'go',
+        desc: 'Go (Max 2 Participants)',
+      },
+      {
+        id: 'peer-to-peer',
+        desc: 'Peer-to-peer (Max 10 Participants)',
+      },
+      {
+        id: 'group',
+        desc: 'Group (Max 50 Participants)',
+      },
+      {
+        id: 'group-small',
+        desc: 'Group-Small (Max 4 Participants)',
+      },
+    ];
 
     let roomName = ref('');
+    let roomType = ref(groupTypes[0]);
+    let maxParticipants = ref(null);
+    let audioOnly = ref(false);
 
     const createAndJoinRoom = async () => {
+      const meetingOptions = {
+        roomName: roomName.value,
+        type: roomType.value.id,
+        maxParticipants: Number.parseInt(maxParticipants.value),
+        audioOnly: audioOnly.value,
+      };
       await api
         .post(
           '/api/createRoom',
           {
-            roomname: roomName.value,
+            options: meetingOptions,
           },
           {
             headers: {
@@ -76,7 +96,15 @@ export default defineComponent({
         });
     };
 
-    return { url, roomName, createAndJoinRoom };
+    return {
+      url,
+      roomName,
+      createAndJoinRoom,
+      roomType,
+      maxParticipants,
+      groupTypes,
+      audioOnly,
+    };
   },
   methods: {
     redirectToHome() {
