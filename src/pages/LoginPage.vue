@@ -39,7 +39,6 @@ export default defineComponent({
     let errorMessage = ref('');
 
     function login() {
-      console.log(username.value, password.value);
       api
         .get('/api/login', {
           params: {
@@ -52,22 +51,19 @@ export default defineComponent({
           },
         })
         .then((response) => {
-          console.log(response.data);
           Cookies.set('token', response.data.token);
 
           // Redirect to home page using router
           router.push('/');
         })
         .catch((error) => {
-          console.log(error);
-
           if (error.response.data.status === 'failed') {
             if (error.response.data.errorCode === 'FAILED_TO_FETCH_USER') {
               errorMessage.value = 'Wrong Password or Username'; // Update error message
             } else if (error.response.data.errorCode === 'BAD_CREDENTIALS') {
               errorMessage.value = 'Wrong Password or Username'; // Update error message
             } else if (error.response.data.errorCode === 'NO_USER') {
-              errorMessage.value = 'Wrong Password or Username'; // Update error message
+              errorMessage.value = 'No User Exists With This Username'; // Update error message
             } else {
               errorMessage.value = 'Unknown error'; // Update error message
             }
