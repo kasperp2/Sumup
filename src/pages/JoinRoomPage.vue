@@ -38,21 +38,10 @@ export default defineComponent({
 
     const router = useRouter(); // Get the router instance
 
-    const connectRoom = async (
-      roomName: string,
-      uniqueName: string,
-      token: any
-    ) => {
-      let newRoom = null;
-      if (!uniqueName) {
-        newRoom = await connect(token, {
-          name: roomName,
-        });
-      } else if (uniqueName) {
-        newRoom = await connect(token, {
-          name: uniqueName,
-        });
-      }
+    const connectRoom = async (roomName: string, token: any) => {
+      const newRoom = await connect(token, {
+        name: roomName,
+      });
       room = newRoom;
       return newRoom;
     };
@@ -107,12 +96,12 @@ export default defineComponent({
       participantDiv.remove();
     };
 
-    const joinRoom = async (uniqueName: string) => {
+    const joinRoom = async () => {
       // if (!localStorage.getItem('TwilioToken')) {
       await api
         .get('/api/joinRoom', {
           params: {
-            roomName: uniqueName || roomName.value,
+            roomName: roomName.value,
           },
           headers: {
             'Content-Type': 'application/json',
@@ -130,7 +119,6 @@ export default defineComponent({
       // find or create a room with the given roomName
       const room = await connectRoom(
         roomName.value,
-        uniqueName,
         localStorage.getItem('TwilioToken')
       );
 
@@ -154,7 +142,7 @@ export default defineComponent({
         .post(
           '/api/createRoom',
           {
-            roomName: roomName.value,
+            roomname: roomName.value,
           },
           {
             headers: {
@@ -165,7 +153,8 @@ export default defineComponent({
         )
         .then(async (response) => {
           console.log(response);
-          await joinRoom(response.data.room as string);
+          roomName.value = response.data.room.uniqueName as string;
+          await joinRoom();
         })
         .catch((error) => {
           console.log(error);
