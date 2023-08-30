@@ -39,6 +39,7 @@ export default defineComponent({
     let errorMessage = ref('');
 
     function login() {
+      console.log(username.value, password.value);
       api
         .get('/api/login', {
           params: {
@@ -51,12 +52,15 @@ export default defineComponent({
           },
         })
         .then((response) => {
+          console.log(response.data);
           Cookies.set('token', response.data.token);
 
           // Redirect to home page using router
           router.push('/');
         })
         .catch((error) => {
+          console.log(error);
+
           if (error.response.data.status === 'failed') {
             if (error.response.data.errorCode === 'FAILED_TO_FETCH_USER') {
               errorMessage.value = 'Wrong Password or Username'; // Update error message
