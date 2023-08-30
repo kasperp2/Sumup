@@ -41,8 +41,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import 'gsap/TextPlugin';
-
 import RecordListItem from '/src/components/RecordListItemComponent.vue';
 import { usePageStore } from 'src/stores/page';
 import { useRecorderStore } from 'src/stores/recorder';
