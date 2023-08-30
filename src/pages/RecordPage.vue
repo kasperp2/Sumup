@@ -37,16 +37,18 @@ export default defineComponent({
       date: string;
     }
 
-    const items = ref<Item[]>([])
-
-    for (let i = 0; i < 10; i++) {
-      items.value.push({
-        id: i,
-        title: `title ${i}`,
-        date: `Date ${i}`,
-      })
-
-    }
+    const items = ref<Item[]>([
+      { id: 1, title: 'Title 1', date: '2023-01-01' },
+      { id: 2, title: 'Title 2', date: '2023-02-15' },
+      { id: 3, title: 'Title 3', date: '2023-03-20' },
+      { id: 4, title: 'Title 4', date: '2023-04-10' },
+      { id: 5, title: 'Title 5', date: '2023-05-05' },
+      { id: 6, title: 'Title 6', date: '2023-06-15' },
+      { id: 7, title: 'Title 7', date: '2023-07-25' },
+      { id: 8, title: 'Title 8', date: '2023-08-30' },
+      { id: 9, title: 'Title 9', date: '2023-09-10' },
+      { id: 10, title: 'Title 10', date: '2023-10-20' },
+    ]);
 
     // TODO: onLoad function
     function onLoad() {
