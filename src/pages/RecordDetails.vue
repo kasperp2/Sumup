@@ -11,9 +11,9 @@
 
         <div class="border border-gray-200 q-ma-lg q-pa-md">
             <p class="text-gray-500 float-right"> <!-- Paste date of transaction here -->
-                DoT: 10/03/2077</p>
+                {{ $route.params.date }}</p>
             <h2 class="text-lg font-bold">
-                Record title: {{ $route.params.title }}</h2>
+                {{ $route.params.title }}</h2>
             <p class="text-gray-500"> <!-- Paste text data table here -->
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                 incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco

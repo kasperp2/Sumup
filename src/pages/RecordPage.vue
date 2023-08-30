@@ -10,7 +10,7 @@
     <q-scroll-area style="height: 500px; max-width: 100%;">
       <div>
         <RecordListItem v-for="item in items" :key="item.id" :title="item.title" :date="item.date" class="mb-4"
-          @click="redirectToDetails(item.title)" />
+          @click="redirectToDetails(item.title, item.date)" />
       </div>
     </q-scroll-area>
 
@@ -62,8 +62,8 @@ export default defineComponent({
     }
   },
   methods: {
-    redirectToDetails(title: string) {
-      this.$router.push({ name: 'record_details', params: { title: title } });
+    redirectToDetails(title: string, date: string) {
+      this.$router.push({ name: 'record_details', params: { title: title, date: date } });
     }
   }
 });
