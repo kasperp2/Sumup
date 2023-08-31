@@ -1,12 +1,14 @@
-import { log } from 'console';
 import { defineStore } from 'pinia';
+import { api } from 'boot/axios'
+
 
 export const useRecorderStore = defineStore('recorder', {
   state: () => ({
     words: '',
     interim: '',
+    name: '',
     isListining: false,
-    recognition: null as SpeechRecognition | null,
+    recognition: null as webkitSpeechRecognition | null,
     error: '',
   }),
   getters: {
@@ -18,6 +20,8 @@ export const useRecorderStore = defineStore('recorder', {
       this.recognition.continuous = true
       this.recognition.lang = lang
       this.recognition.interimResults = true
+
+      this.clear()
 
       this.recognition.onresult = (event) => {
         const current = event.resultIndex
@@ -34,6 +38,8 @@ export const useRecorderStore = defineStore('recorder', {
       }
 
       this.recognition.onerror = (event) => {
+        if(event.error === 'no-speech') return
+
         this.isListining = false
         this.error = event.error
       }
@@ -47,7 +53,6 @@ export const useRecorderStore = defineStore('recorder', {
     start() {
       if (this.recognition == null) return
       this.isListining = true
-      console.log('start');
       this.recognition.start()
     },
 
@@ -55,6 +60,22 @@ export const useRecorderStore = defineStore('recorder', {
       if (this.recognition == null) return
       this.isListining = false
       this.recognition.stop()
+    },
+
+    clear() {
+      this.words = ''
+      this.interim = ''
+      this.name = new Date().toISOString().slice(0, 10)
+    },
+
+    async save() {
+      await api.post('/api/transcript', {
+        userId: 1,
+        name: this.name,
+        content: this.words,
+      })
+
+      this.clear()
     }
   },
 });
