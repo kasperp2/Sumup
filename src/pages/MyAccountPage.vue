@@ -46,11 +46,14 @@
 <script lang="ts">
 import { api } from 'src/boot/axios';
 import { defineComponent, ref } from 'vue';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
   name: 'MyAccountPage',
   components: {},
   setup() {
+    const $q = useQuasar();
+
     const email = ref('Doe@John.com');
     const username = ref('John Doe');
     const currentPassword = ref('');
@@ -60,32 +63,41 @@ export default defineComponent({
 
     const updateInformation = () => {
       if (email.value.trim() === '') {
-        console.log('Email is empty');
+        return void $q.notify('Email is empty');
       }
 
       // check if email is valid
       if (!email.value.includes('@') || !email.value.includes('.')) {
-        console.log('Email is invalid');
+        return void $q.notify('Email is invalid');
       }
 
       if (currentPassword.value.trim() === '') {
-        console.log('Current password is empty');
+        return void $q.notify('Current password is empty');
       }
 
       if (newPassword.value.trim() !== confirmPassword.value.trim()) {
-        console.log('New password and confirm password do not match');
+        return void $q.notify('New password and confirm password do not match');
       }
 
       // new password is optional
-      api.post('/api/update', {
-        email: email.value,
-        username: username.value,
-        currentPassword: currentPassword.value,
-        newPassword: newPassword.value,
-        confirmPassword: confirmPassword.value,
-      });
-
-      console.log('Updated information');
+      api
+        .put('/api/update', {
+          email: email.value,
+          username: username.value,
+          currentPassword: currentPassword.value,
+          newPassword: newPassword.value,
+          confirmPassword: confirmPassword.value,
+        })
+        .then((response) => {
+          if (response.data.success) {
+            $q.notify('Updated information');
+          } else {
+            $q.notify(response.data.message);
+          }
+        })
+        .catch((error) => {
+          $q.notify(error.message);
+        });
     };
 
     return {
