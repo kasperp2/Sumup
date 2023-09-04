@@ -44,9 +44,6 @@ export default {
 
         }
 
-    },
-    mounted() {
-        console.log("jegersej")
     }
 }
 </script>
