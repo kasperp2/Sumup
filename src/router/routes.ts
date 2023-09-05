@@ -27,8 +27,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [{ name: 'record_details', path: '', component: () => import('pages/RecordDetails.vue') }],
   },
-
-  
+  {
+    path: '/joinRoom',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/JoinRoomPage.vue') }],
+  },
+  {
+    path: '/createRoom',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/CreateRoomPage.vue') },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it
