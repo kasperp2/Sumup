@@ -73,17 +73,11 @@ export default defineComponent({
       });
     }
 
-    // TODO: onLoad function
-    function onLoad() {
-      console.log('load');
-    }
-
     // AUDIO RECORDING
     const recorder = useRecorderStore();
 
     return {
       items,
-      onLoad,
       recorder,
     };
   },
