@@ -2,56 +2,46 @@
   <q-layout view="lFf Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-        <q-toolbar-title></q-toolbar-title>
+        <q-toolbar-title>{{ $route.matched[0].name }}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-footer bordered class="bg-grey-3 text-primary">
-      <component
-        to="/record"
-        :class="{'record-btn':true, 'recording':recorder.isListining}"
-        :is="onRecordPage ? 'span' : 'router-link'"
-        @click="clickRecord"
-        >
-          <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
-      </component>
+
+      <transition name="fall-down">
+        <div
+          v-if="showRecordBtn"
+          :class="{'record-btn':true, 'recording':recorder.isListining, 'unavalible':true}"
+          @click="clickRecord"
+          >
+            <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
+        </div>
+      </transition>
 
       <q-tabs
         no-caps
         active-color="primary"
         indicator-color="transparent"
         class="text-grey-8"
-      >
-        <q-route-tab icon="home" label="home" to="/" exact />
+        >
+
+        <q-route-tab
+          icon="keyboard_voice"
+          label="Record"
+          to="/record"
+          exact
+          />
 
         <!-- hidden when in desktop -->
-        <q-tab class="q-tab-record"></q-tab>
+        <q-tab class="q-tab-record" disable></q-tab>
 
-        <q-tab
-          icon="keyboard_voice"
-          label="Recorder"
-          link="https://quasar.dev"
-        />
+        <q-route-tab
+          icon="videocam"
+          label="Call"
+          to="/"
+          />
       </q-tabs>
     </q-footer>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -61,73 +51,30 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import EssentialLink from 'components/EssentialLink.vue';
-import { usePageStore } from 'src/stores/page';
 import { useRecorderStore } from 'src/stores/recorder';
-
-const linksList = [
-  {
-    title: 'Home',
-    caption: 'The starting point',
-    icon: 'home',
-    link: '/',
-    type: 'icon',
-  },
-  {
-    title: 'SumUps',
-    caption: 'Your SumUps',
-    icon: '/src/assets/logo.png',
-    link: '/record',
-    type: 'img',
-  },
-  {
-    title: 'About',
-    caption: 'About SumUp',
-    icon: 'info',
-    link: '/about',
-    type: 'icon',
-  },
-  {
-    title: 'My Account',
-    caption: 'Account information',
-    icon: 'info',
-    link: '/myaccount',
-    type: 'icon',
-  },
-];
+import { ScriptCompileContext } from 'vue/compiler-sfc';
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {
-    EssentialLink,
   },
 
   computed: {
-    onRecordPage() {
-      return this.$route.path == '/record';
+    showRecordBtn() {
+      return ['/record'].includes(this.$route.path);
     },
     recorder() {
       return useRecorderStore();
     },
     clickRecord() {
-      if (this.onRecordPage) {
-        return this.recorder.isListining
-          ? this.recorder.stop
-          : this.recorder.start;
-      } else {
-        return null;
-      }
+      return this.recorder.isListining ? this.recorder.stop : this.recorder.start
     },
   },
 
   setup() {
-    const leftDrawerOpen = ref(false);
-    const pageStore = usePageStore();
-
     useRecorderStore().createRecognition('da-DK');
 
-    // type ref soundBars
     const soundBars = ref<number[]>([])
 
     const resetSoundBars = () => {
@@ -139,50 +86,41 @@ export default defineComponent({
 
     resetSoundBars()
 
+      navigator.mediaDevices.getUserMedia({audio: true})
+        .then((stream) => {
+          const audioContext = new AudioContext();
+          const analyser = audioContext.createAnalyser();
+          const microphone = audioContext.createMediaStreamSource(stream);
+          const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
 
-    navigator.mediaDevices.getUserMedia({audio: true,})
-      .then((stream) => {
-        const audioContext = new AudioContext();
-        const analyser = audioContext.createAnalyser();
-        const microphone = audioContext.createMediaStreamSource(stream);
-        const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+          analyser.smoothingTimeConstant = 0.8;
+          analyser.fftSize = 1024;
 
-        analyser.smoothingTimeConstant = 0.8;
-        analyser.fftSize = 1024;
+          microphone.connect(analyser);
+          analyser.connect(scriptProcessor);
+          scriptProcessor.connect(audioContext.destination);
+          scriptProcessor.onaudioprocess = () => {
+            if(!useRecorderStore().isListining) {
+              resetSoundBars()
+              return
+            }
 
-        microphone.connect(analyser);
-        analyser.connect(scriptProcessor);
-        scriptProcessor.connect(audioContext.destination);
-        scriptProcessor.onaudioprocess = () => {
-          if(!useRecorderStore().isListining) {
-            resetSoundBars()
-            return
-          }
+            const array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+            const arraySum = array.reduce((a, value) => a + value, 0);
+            const average = arraySum / array.length;
 
-          const array = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(array);
-          const arraySum = array.reduce((a, value) => a + value, 0);
-          const average = arraySum / array.length;
+            let value = Math.round(average + 2)
+            value = value > 100 ? 100 : value
 
-          let value = Math.round(average + 2)
-          value = value > 100 ? 100 : value
-
-          soundBars.value.push(value);
-          soundBars.value.shift();
-        };
-      })
-
-
+            soundBars.value.push(value);
+            soundBars.value.shift();
+          };
+        })
 
     return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
-      pageStore,
-      soundBars
-    };
+      soundBars,
+    }
   },
 });
 </script>
@@ -222,9 +160,18 @@ $bar-color: rgb(208, 216, 223);
   box-shadow: 0 0 0 20px rgb(154, 61, 72);
 }
 
-.q-tab-record {
-  display:none;
+.fall-down-enter-active,
+.fall-down-leave-active {
+  transition: all 0.5s ease-in-out;
+}
 
+.fall-down-enter-from,
+.fall-down-leave-to {
+  transform: translate(-$size/2, $size * 2);
+}
+
+.q-tab-record{
+  display: none;
 }
 @media (min-width: 600px) {
   .q-tab-record {
@@ -232,7 +179,6 @@ $bar-color: rgb(208, 216, 223);
     width: $size + 50px;
   }
 }
-
 
 .sound-bar {
   width: 5px;

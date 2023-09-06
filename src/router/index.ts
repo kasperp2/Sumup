@@ -8,6 +8,8 @@ import {
 
 import routes from './routes';
 
+import { useRecorderStore } from 'src/stores/recorder';
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -33,6 +35,10 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
+
+  Router.beforeEach(async (to, from) => {
+    if (useRecorderStore().isListining) return false;
+  })
 
   return Router;
 });
