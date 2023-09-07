@@ -20,15 +20,15 @@ const linksList = [
     type: 'icon',
   },
   {
-    title: 'SumUps',
-    caption: 'Your SumUps',
+    title: 'MeetBriefs',
+    caption: 'Your MeetBriefs',
     icon: '/src/assets/logo.png',
     link: 'https://quasar.dev',
     type: 'img',
   },
   {
     title: 'About',
-    caption: 'About SumUp',
+    caption: 'About MeetBrief',
     icon: 'info',
     link: 'https://quasar.dev',
     type: 'icon',
