@@ -30,7 +30,7 @@
             :date="item.createdDate" class="mb-4" />
         </q-scroll-area>
       </div>
-    </Transition>s
+    </Transition>
   </div>
 </template>
 

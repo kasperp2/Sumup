@@ -27,18 +27,20 @@
 import { Cookies } from 'quasar';
 import { api } from 'src/boot/axios';
 import { defineComponent, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
 
 export default {
     name: 'RecordDetails',
-    components: {},
     setup() {
+        const $route = useRoute();
         const id = ref(0)
         const title = ref("")
         const content = ref("")
         const date = ref("")
         api.get('/api/details', {
             params: {
-                id: 1,
+                id: $route.params.id
             },
             method: 'GET',
             headers: {
@@ -52,8 +54,8 @@ export default {
                 title.value = data.transcripts[0].name
                 content.value = data.transcripts[0].content
                 date.value = data.transcripts[0].createdDate
-
             });
+
         return {
             id,
             title,
