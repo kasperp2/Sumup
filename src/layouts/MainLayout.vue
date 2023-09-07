@@ -3,18 +3,31 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>{{ $route.matched[0].name }}</q-toolbar-title>
+        <q-btn href="/myaccount" flat round>
+          <q-avatar color="pink" text-color="white" style="cursor: pointer">{{
+            username
+          }}</q-avatar>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
     <q-footer bordered class="bg-grey-3 text-primary">
-
       <transition name="fall-down">
         <div
           v-if="showRecordBtn"
-          :class="{'record-btn':true, 'recording':recorder.isListining, 'unavalible':true}"
+          :class="{
+            'record-btn': true,
+            recording: recorder.isListining,
+            unavalible: true,
+          }"
           @click="clickRecord"
-          >
-            <div class="sound-bar" v-for="bar, i in soundBars" :key="i" :style="{height: bar + 'px'}"></div>
+        >
+          <div
+            class="sound-bar"
+            v-for="(bar, i) in soundBars"
+            :key="i"
+            :style="{ height: bar + 'px' }"
+          ></div>
         </div>
       </transition>
 
@@ -23,23 +36,13 @@
         active-color="primary"
         indicator-color="transparent"
         class="text-grey-8"
-        >
-
-        <q-route-tab
-          icon="keyboard_voice"
-          label="Record"
-          to="/record"
-          exact
-          />
+      >
+        <q-route-tab icon="keyboard_voice" label="Record" to="/record" exact />
 
         <!-- hidden when in desktop -->
         <q-tab class="q-tab-record" disable></q-tab>
 
-        <q-route-tab
-          icon="videocam"
-          label="Call"
-          to="/"
-          />
+        <q-route-tab icon="videocam" label="Call" to="/" />
       </q-tabs>
     </q-footer>
 
@@ -53,12 +56,12 @@
 import { defineComponent, ref } from 'vue';
 import { useRecorderStore } from 'src/stores/recorder';
 import { ScriptCompileContext } from 'vue/compiler-sfc';
+import { usePageStore } from 'src/stores/page';
 
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-  },
+  components: {},
 
   computed: {
     showRecordBtn() {
@@ -68,59 +71,63 @@ export default defineComponent({
       return useRecorderStore();
     },
     clickRecord() {
-      return this.recorder.isListining ? this.recorder.stop : this.recorder.start
+      return this.recorder.isListining
+        ? this.recorder.stop
+        : this.recorder.start;
     },
   },
 
   setup() {
     useRecorderStore().createRecognition('da-DK');
 
-    const soundBars = ref<number[]>([])
+    const soundBars = ref<number[]>([]);
 
     const resetSoundBars = () => {
-      soundBars.value = []
+      soundBars.value = [];
       for (let i = 0; i < 10; i++) {
-        soundBars.value.push(0)
+        soundBars.value.push(0);
       }
-    }
+    };
 
-    resetSoundBars()
+    resetSoundBars();
 
-      navigator.mediaDevices.getUserMedia({audio: true})
-        .then((stream) => {
-          const audioContext = new AudioContext();
-          const analyser = audioContext.createAnalyser();
-          const microphone = audioContext.createMediaStreamSource(stream);
-          const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
 
-          analyser.smoothingTimeConstant = 0.8;
-          analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.8;
+      analyser.fftSize = 1024;
 
-          microphone.connect(analyser);
-          analyser.connect(scriptProcessor);
-          scriptProcessor.connect(audioContext.destination);
-          scriptProcessor.onaudioprocess = () => {
-            if(!useRecorderStore().isListining) {
-              resetSoundBars()
-              return
-            }
+      microphone.connect(analyser);
+      analyser.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+      scriptProcessor.onaudioprocess = () => {
+        if (!useRecorderStore().isListining) {
+          resetSoundBars();
+          return;
+        }
 
-            const array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            const arraySum = array.reduce((a, value) => a + value, 0);
-            const average = arraySum / array.length;
+        const array = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+        const arraySum = array.reduce((a, value) => a + value, 0);
+        const average = arraySum / array.length;
 
-            let value = Math.round(average + 2)
-            value = value > 100 ? 100 : value
+        let value = Math.round(average + 2);
+        value = value > 100 ? 100 : value;
 
-            soundBars.value.push(value);
-            soundBars.value.shift();
-          };
-        })
+        soundBars.value.push(value);
+        soundBars.value.shift();
+      };
+    });
 
     return {
       soundBars,
-    }
+      username: ref(
+        localStorage.getItem('username')?.slice(0, 2)?.toUpperCase() ?? '?'
+      ),
+    };
   },
 });
 </script>
@@ -170,7 +177,7 @@ $bar-color: rgb(208, 216, 223);
   transform: translate(-$size/2, $size * 2);
 }
 
-.q-tab-record{
+.q-tab-record {
   display: none;
 }
 @media (min-width: 600px) {
@@ -190,6 +197,4 @@ $bar-color: rgb(208, 216, 223);
   // animation
   transition: height 0.1s ease-in-out;
 }
-
-
 </style>
