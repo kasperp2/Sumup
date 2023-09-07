@@ -36,7 +36,6 @@ import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
-// import joinRoom from 'src/pages/JoinRoomPage.vue';
 
 export default defineComponent({
   name: 'CreateRoomPage',
@@ -95,9 +94,7 @@ export default defineComponent({
         )
         .then(async (response) => {
           roomName.value = response.data.room.uniqueName as string;
-          // await joinRoom.joinRoom(roomName.value);
           router.push({
-            // name: 'JoinRoomPage',
             path: '/joinRoom/',
             query: { roomName: roomName.value, joinRoom: 'true' },
           });

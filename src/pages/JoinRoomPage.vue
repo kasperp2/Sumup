@@ -50,7 +50,6 @@ export default defineComponent({
     const isRoomCreated = this.$route.query.joinRoom == 'true';
     const roomName = this.$route.query.roomName as string;
     if (isRoomCreated) {
-      console.log(roomName);
       this.joinRoom(roomName);
     }
   },
@@ -138,7 +137,6 @@ export default defineComponent({
     };
 
     const joinRoom = async (joinRoomName = roomName.value) => {
-      console.log(joinRoomName);
       if (!localStorage.getItem('TwilioToken')) {
         await api
           .get('/api/joinRoom', {
