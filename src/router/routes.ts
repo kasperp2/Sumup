@@ -1,3 +1,4 @@
+import { Cookies } from 'quasar';
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
