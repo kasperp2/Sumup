@@ -9,7 +9,6 @@
         class="q-ma-md"
       />
       <div class="text-h5 mt-2">Loading...</div>
-      <p>{{ isLoaded }}</p>
     </div>
     <div v-else class="flex flex-col items-center mt-4">
       <div class="text-h4">My Account</div>
