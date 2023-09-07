@@ -83,7 +83,6 @@ export default defineComponent({
         })
         .then((response) => {
           items.value = response.data.transcripts;
-          console.log(items.value);
         });
     }
 
