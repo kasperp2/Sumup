@@ -10,18 +10,11 @@
         </q-input>
 
         <div class="border border-gray-200 q-ma-lg q-pa-md">
-            <p class="text-gray-500 float-right"> <!-- Paste date of transaction here -->
-                {{ $route.params.date }}</p>
+            <p class="text-gray-500 float-right"> {{ date }} </p>
             <h2 class="text-lg font-bold">
-                {{ $route.params.title }}</h2>
+                {{ title }}</h2>
             <p class="text-gray-500"> <!-- Paste text data table here -->
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-                velit
-                esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                culpa
-                qui officia deserunt mollit anim id est laborum.</p>
+                {{ content }}</p>
 
         </div>
         <div class="q-ma-sm q-pa-md">
@@ -31,13 +24,41 @@
     </div>
 </template>
 <script lang="ts">
+import { Cookies } from 'quasar';
+import { api } from 'src/boot/axios';
 import { defineComponent, ref } from 'vue';
 
 export default {
     name: 'RecordDetails',
     components: {},
     setup() {
+        const id = ref(0)
+        const title = ref("")
+        const content = ref("")
+        const date = ref("")
+        api.get('/api/details', {
+            params: {
+                id: 1,
+            },
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`,
+            },
+        })
+            .then((response) => {
+                const data = response.data
+                console.log(data)
+                id.value = data.transcripts[0].id
+                title.value = data.transcripts[0].name
+                content.value = data.transcripts[0].content
+                date.value = data.transcripts[0].createdDate
+
+            });
         return {
+            id,
+            title,
+            content,
+            date,
             text: ref(''),
             ph: ref(''),
             dense: ref(false)
