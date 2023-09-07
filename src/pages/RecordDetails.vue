@@ -49,7 +49,7 @@ export default {
     })
       .then((response) => {
         const data = response.data
-        console.log(data)
+
         id.value = data.transcripts[0].id
         title.value = data.transcripts[0].name
         content.value = data.transcripts[0].content
@@ -68,7 +68,6 @@ export default {
         },
       })
         .then((response) => {
-          console.log(response)
           content.value = response.data.extractedTopics.replace(/\n/g, '<br>');
         });
     }
