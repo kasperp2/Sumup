@@ -42,7 +42,7 @@
         <!-- hidden when in desktop -->
         <q-tab class="q-tab-record" disable></q-tab>
 
-        <q-route-tab icon="videocam" label="Call" to="/" />
+        <q-route-tab icon="videocam" label="Call" to="/JoinRoom" />
       </q-tabs>
     </q-footer>
 
