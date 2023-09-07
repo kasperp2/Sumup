@@ -13,7 +13,13 @@
       <p class="text-gray-500 float-right"> {{ date }} </p>
       <h2 class="text-lg font-bold">
         {{ title }}</h2>
-      <p class="text-gray-500" v-html="content"></p>
+      <div v-if="!isLoaded" class="flex flex-col items-center mt-4">
+        <q-circular-progress indeterminate rounded size="100px" color="primary" class="q-ma-md" />
+        <div class="text-h5 mt-2">Loading...</div>
+      </div>
+      <div v-else>
+        <p class="text-gray-500" v-html="content"></p>
+      </div>
 
     </div>
     <div class="q-ma-sm q-pa-md flex gap-2">
@@ -38,6 +44,9 @@ export default {
     const title = ref("")
     const content = ref("")
     const date = ref("")
+    const isLoaded = ref(false);
+
+
     api.get('/api/details', {
       params: {
         id: $route.params.id
@@ -54,9 +63,12 @@ export default {
         title.value = data.transcripts[0].name
         content.value = data.transcripts[0].content
         date.value = data.transcripts[0].createdDate
+
+        isLoaded.value = true;
       });
 
     const summarizeText = () => {
+      isLoaded.value = false;
       api.get('/api/convertText', {
         params: {
           text: content.value,
@@ -69,6 +81,10 @@ export default {
       })
         .then((response) => {
           content.value = response.data.extractedTopics.replace(/\n/g, '<br>');
+          isLoaded.value = true;
+        }).catch((error) => {
+          console.log(error)
+          isLoaded.value = true;
         });
     }
 
@@ -81,6 +97,7 @@ export default {
       ph: ref(''),
       dense: ref(false),
       summarizeText,
+      isLoaded,
     }
   },
 }
