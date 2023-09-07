@@ -26,23 +26,13 @@
         active-color="primary"
         indicator-color="transparent"
         class="text-grey-8"
-        >
-
-        <q-route-tab
-          icon="keyboard_voice"
-          label="Record"
-          to="/record"
-          exact
-          />
+      >
+        <q-route-tab icon="keyboard_voice" label="Record" to="/record" exact />
 
         <!-- hidden when in desktop -->
         <q-tab class="q-tab-record" disable></q-tab>
 
-        <q-route-tab
-          icon="videocam"
-          label="Call"
-          to="/"
-          />
+        <q-route-tab icon="videocam" label="Call" to="/" />
       </q-tabs>
     </q-footer>
 
@@ -60,8 +50,7 @@ import { ScriptCompileContext } from 'vue/compiler-sfc';
 export default defineComponent({
   name: 'MainLayout',
 
-  components: {
-  },
+  components: {},
 
   computed: {
     showRecordBtn() {
@@ -71,7 +60,9 @@ export default defineComponent({
       return useRecorderStore();
     },
     clickRecord() {
-      return this.recorder.isListining ? this.recorder.stop : this.recorder.start
+      return this.recorder.isListining
+        ? this.recorder.stop
+        : this.recorder.start;
     },
   },
 
@@ -79,7 +70,7 @@ export default defineComponent({
     useRecorderStore().createRecognition('da-DK');
 
     // type ref soundBars
-    const soundBars = ref<number[]>([])
+    const soundBars = ref<number[]>([]);
 
     const resetSoundBars = () => {
       soundBars.value = [];
@@ -120,16 +111,6 @@ export default defineComponent({
         soundBars.value.shift();
       };
     });
-
-    return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
-      pageStore,
-      soundBars,
-    };
   },
 });
 </script>
@@ -179,7 +160,7 @@ $bar-color: rgb(208, 216, 223);
   transform: translate(-$size/2, $size * 2);
 }
 
-.q-tab-record{
+.q-tab-record {
   display: none;
 }
 @media (min-width: 600px) {
