@@ -7,6 +7,10 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
+import { Cookies } from 'quasar';
+import { api } from 'src/boot/axios';
+
+import { useRecorderStore } from 'src/stores/recorder';
 
 /*
  * If not building with SSR mode, you can
@@ -34,5 +38,34 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
+  Router.beforeEach((to, from) => {
+    if (to.path === '/login') return true;
+    if (useRecorderStore().isListining) return false;
+    
+    const canAccess = canUserAccess();
+    if (!canAccess) return '/login';
+
+    api
+      .get('/api/validateToken', {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('token')}`,
+        },
+      })
+      .then((res) => {
+        if (res.status !== 200) return '/login';
+      })
+      .catch((err) => {
+        return '/login';
+      });
+
+    return true;
+  });
+
   return Router;
 });
+
+const canUserAccess = () => {
+  const token = Cookies.get('token');
+
+  return token && token !== '' ? true : false;
+};

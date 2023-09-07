@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from 'boot/axios';
+import { Cookies } from 'quasar';
 
 export const useRecorderStore = defineStore('recorder', {
   state: () => ({
@@ -69,16 +70,22 @@ export const useRecorderStore = defineStore('recorder', {
     clear() {
       this.words = '';
       this.interim = '';
-      this.name = new Date().toISOString().slice(0, 10);
+      this.name = '';
     },
 
     async save() {
-      await api.post('/api/transcript', {
-        userId: 1,
-        name: this.name,
-        content: this.words,
-      });
-
+      await api.post(
+        '/api/transcript',
+        {
+          name: this.name,
+          content: this.current,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('token')}`,
+          },
+        }
+      );
       this.clear();
     },
 

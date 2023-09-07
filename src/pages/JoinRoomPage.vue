@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-row md:flex-col items-center justify-evenly">
+  <q-page class="flex flex-row md:flex-col items-center justify-center">
     <div class="flex flex-row items-center justify-center">
       <img :src="url" class="w-32 h-32" />
       <div class="text-h1">MeetBrief</div>
@@ -7,11 +7,31 @@
 
     <div id="video-container"></div>
 
-    <div class="flex flex-col gap-2">
-      <q-input filled v-model="roomName" label="Room Name:" />
-      <q-btn @click="joinRoom" label="Join room" class="w-64" />
-      <q-btn @click="disconnectRoom" label="Disconnect room" class="w-64" />
-      <q-btn @click="createAndJoinRoom" label="Create room" class="w-64" />
+    <div class="flex flex-col gap-2 mt-10">
+      <q-input
+        filled
+        v-model="displayName"
+        label="Display Name:"
+        class="beforeJoin"
+      />
+      <q-input
+        filled
+        v-model="roomName"
+        label="Room Name:"
+        class="beforeJoin"
+      />
+      <q-btn
+        @click="joinRoom(roomName)"
+        label="Join room"
+        class="w-64 beforeJoin"
+      />
+      <q-btn
+        @click="disconnectRoom"
+        label="Disconnect"
+        class="w-64 afterJoin"
+        style="display: none"
+      />
+      <q-btn @click="createRoom" label="Create room" class="w-64 beforeJoin" />
     </div>
   </q-page>
 </template>
@@ -26,14 +46,26 @@ import { connect } from 'twilio-video';
 export default defineComponent({
   name: 'JoinRoomPage',
   components: {},
+  mounted() {
+    const isRoomCreated = this.$route.query.joinRoom == 'true';
+    const roomName = this.$route.query.roomName as string;
+    if (isRoomCreated) {
+      this.joinRoom(roomName);
+    }
+  },
   setup() {
     let container = null as any;
+    let beforeJoin = null as any;
+    let afterJoin = null as any;
     onMounted(() => {
       container = document.getElementById('video-container') as HTMLElement;
+      beforeJoin = document.getElementsByClassName('beforeJoin');
+      afterJoin = document.getElementsByClassName('afterJoin');
     });
     const url = '/src/assets/logo.png';
 
     let roomName = ref('');
+    let displayName = ref('');
     let room = ref(null) as any;
 
     const router = useRouter(); // Get the router instance
@@ -51,6 +83,14 @@ export default defineComponent({
       const participantDiv = document.createElement('div');
       participantDiv.setAttribute('id', participant.identity);
       container.appendChild(participantDiv);
+
+      for (let i = 0; i < beforeJoin.length; i++) {
+        beforeJoin[i].setAttribute('style', 'display: none');
+      }
+
+      for (let i = 0; i < afterJoin.length; i++) {
+        afterJoin[i].setAttribute('style', 'display: block');
+      }
 
       // iterate through the participant's published tracks and
       // call `handleTrackPublication` on them
@@ -96,12 +136,12 @@ export default defineComponent({
       participantDiv.remove();
     };
 
-    const joinRoom = async () => {
+    const joinRoom = async (joinRoomName = roomName.value) => {
       if (!localStorage.getItem('TwilioToken')) {
         await api
           .get('/api/joinRoom', {
             params: {
-              roomName: roomName.value,
+              roomName: joinRoomName,
             },
             headers: {
               'Content-Type': 'application/json',
@@ -118,7 +158,7 @@ export default defineComponent({
 
       // find or create a room with the given roomName
       const room = await connectRoom(
-        roomName.value,
+        joinRoomName,
         localStorage.getItem('TwilioToken')
       );
 
@@ -137,31 +177,18 @@ export default defineComponent({
       router.push('/');
     };
 
-    const createAndJoinRoom = async () => {
-      await api
-        .post(
-          '/api/createRoom',
-          {
-            roomname: roomName.value,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + Cookies.get('token'),
-            },
-          }
-        )
-        .then(async (response) => {
-          console.log(response);
-          roomName.value = response.data.room.uniqueName as string;
-          await joinRoom();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    const createRoom = () => {
+      router.push('/createRoom');
     };
 
-    return { url, roomName, joinRoom, disconnectRoom, createAndJoinRoom };
+    return {
+      url,
+      roomName,
+      displayName,
+      joinRoom,
+      disconnectRoom,
+      createRoom,
+    };
   },
   methods: {
     redirectToHome() {
