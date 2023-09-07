@@ -10,6 +10,8 @@ import routes from './routes';
 import { Cookies } from 'quasar';
 import { api } from 'src/boot/axios';
 
+import { useRecorderStore } from 'src/stores/recorder';
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
