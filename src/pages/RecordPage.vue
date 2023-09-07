@@ -65,6 +65,7 @@ export default defineComponent({
 
     async function clicksave() {
       await recorder.save();
+      getitems();
     }
     getitems();
 
