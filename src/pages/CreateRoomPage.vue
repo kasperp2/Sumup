@@ -22,6 +22,7 @@
             option-value="id"
             option-label="desc"
             label="Group Type:"
+            @update:model-value="maxParticipants = roomType.maxParticipants"
           />
         </div>
       </div>
@@ -31,46 +32,51 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
-import { connect } from 'twilio-video';
 
 export default defineComponent({
   name: 'CreateRoomPage',
   components: {},
   setup() {
+    const router = useRouter(); // Get the router instance
+
     const url = '/src/assets/logo.png';
     const groupTypes = [
       {
         id: 'go',
         desc: 'Go (Max 2 Participants)',
+        maxParticipants: 2,
       },
       {
         id: 'peer-to-peer',
         desc: 'Peer-to-peer (Max 10 Participants)',
+        maxParticipants: 10,
       },
       {
         id: 'group',
         desc: 'Group (Max 50 Participants)',
+        maxParticipants: 50,
       },
       {
         id: 'group-small',
         desc: 'Group-Small (Max 4 Participants)',
+        maxParticipants: 4,
       },
     ];
 
     let roomName = ref('');
     let roomType = ref(groupTypes[0]);
-    let maxParticipants = ref(null);
+    let maxParticipants = ref(roomType.value.maxParticipants);
     let audioOnly = ref(false);
 
     const createAndJoinRoom = async () => {
       const meetingOptions = {
         roomName: roomName.value,
         type: roomType.value.id,
-        maxParticipants: Number.parseInt(maxParticipants.value),
+        maxParticipants: maxParticipants.value,
         audioOnly: audioOnly.value,
       };
       await api
@@ -87,9 +93,11 @@ export default defineComponent({
           }
         )
         .then(async (response) => {
-          console.log(response);
           roomName.value = response.data.room.uniqueName as string;
-          // await joinRoom();
+          router.push({
+            path: '/joinRoom/',
+            query: { roomName: roomName.value, joinRoom: 'true' },
+          });
         })
         .catch((error) => {
           console.log(error);

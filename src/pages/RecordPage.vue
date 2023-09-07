@@ -10,18 +10,10 @@
       <div v-if="recorder.current" class="m-5">
         <div class="text-h5">
           <div style="display: flex; flex-direction: column">
-            <span
-              v-if="!recorder.name.trim()"
-              style="font-size: small"
-              class="text-red-500"
-            >
+            <span v-if="!recorder.name.trim()" style="font-size: small" class="text-red-500">
               {{ !recorder.name.trim() ? 'Name cannot be empty' : '' }}
             </span>
-            <input
-              v-model="recorder.name"
-              class="border-none outline-none"
-              placeholder="Name"
-            />
+            <input v-model="recorder.name" class="border-none outline-none" placeholder="Name" />
           </div>
         </div>
 
@@ -34,22 +26,13 @@
     <Transition name="fall-down">
       <div v-if="!recorder.isListining">
         <div v-if="recorder.current" class="mb-5 flex justify-around">
-          <q-btn @click="recorder.clear()" rounded color="negative"
-            >clear<q-icon class="ml-2" name="backspace"
-          /></q-btn>
-          <q-btn @click="clicksave()" rounded color="positive"
-            >save<q-icon class="ml-2" name="upload"
-          /></q-btn>
+          <q-btn @click="recorder.clear()" rounded color="negative">clear<q-icon class="ml-2" name="backspace" /></q-btn>
+          <q-btn @click="clicksave()" rounded color="positive">save<q-icon class="ml-2" name="upload" /></q-btn>
         </div>
 
         <q-scroll-area style="height: 500px; max-width: 100%">
-          <RecordListItem
-            v-for="item in items"
-            :key="item.id"
-            :title="item.name"
-            :date="item.createdDate"
-            class="mb-4"
-          />
+          <RecordListItem @click=redirectToDetails(item.id) v-for="item in items" :key="item.id" :title="item.name"
+            :date="item.createdDate" class="mb-4" />
         </q-scroll-area>
       </div>
     </Transition>
@@ -108,6 +91,11 @@ export default defineComponent({
       clicksave,
     };
   },
+  methods: {
+    redirectToDetails(id: number) {
+      this.$router.push({ name: 'record_details', params: { id: id } });
+    }
+  }
 });
 </script>
 

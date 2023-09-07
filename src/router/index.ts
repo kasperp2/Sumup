@@ -43,7 +43,6 @@ export default route(function (/* { store, ssrContext } */) {
   Router.beforeEach((to, from) => {
     if (to.path === '/login') return true;
     if (useRecorderStore().isListining) return false;
-
     const canAccess = canUserAccess();
     if (!canAccess) return '/login';
 

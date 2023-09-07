@@ -1,6 +1,6 @@
-# sumup (sumup)
+# MeetBrief (MeetBrief)
 
-sumup
+MeetBrief
 
 ## Install the dependencies
 

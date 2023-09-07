@@ -1,8 +1,8 @@
 {
-  "name": "sumup",
+  "name": "MeetBrief",
   "version": "0.0.1",
-  "description": "sumup",
-  "productName": "sumup",
+  "description": "MeetBrief",
+  "productName": "MeetBrief",
   "author": "Kasper Ebsen <kasperpborum@gmail.com>",
   "private": true,
   "scripts": {
