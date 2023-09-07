@@ -70,7 +70,7 @@ export const useRecorderStore = defineStore('recorder', {
     clear() {
       this.words = '';
       this.interim = '';
-      this.name = new Date().toISOString().slice(0, 10);
+      this.name = '';
     },
 
     async save() {
