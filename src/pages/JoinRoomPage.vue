@@ -22,6 +22,8 @@ import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
 import { connect } from 'twilio-video';
+import { useRecorderStore } from 'src/stores/recorder';
+import Twilio from 'twilio-video';
 
 export default defineComponent({
   name: 'JoinRoomPage',
@@ -36,6 +38,8 @@ export default defineComponent({
     let roomName = ref('');
     let room = ref(null) as any;
 
+    // AUDIO RECORDING
+    const recorder = useRecorderStore();
     const router = useRouter(); // Get the router instance
 
     const connectRoom = async (roomName: string, token: any) => {
@@ -62,7 +66,7 @@ export default defineComponent({
       participant.on('trackPublished', handleTrackPublication);
     };
 
-    const handleTrackPublication = (
+    const handleTrackPublication = async (
       trackPublication: any,
       participant: any
     ) => {
@@ -73,7 +77,23 @@ export default defineComponent({
         ) as HTMLElement;
         // track.attach creates an HTMLVideoElement or HTMLAudioElement
         // (depending on the type of track) and adds the video or audio stream
-        participantDiv.append(track.attach());
+        if (track?.kind === 'video') {
+          track = Twilio.createLocalVideoTrack().then((track) => {
+            participantDiv.append(track.attach());
+
+            const recorderDiv = document.createElement('div');
+            recorderDiv.setAttribute('id', 'recorder');
+            recorderDiv.innerHTML = recorder.current;
+            participantDiv.append(recorderDiv);
+          });
+        }
+        // participantDiv.append(track.attach());
+        // participant.media.attach(recorderDiv);
+
+        if (track?.kind === 'audio') {
+          const audioTrack = track;
+          startAudioRecorder(audioTrack.mediaStreamTrack);
+        }
       }
 
       // check if the trackPublication contains a `track` attribute. If it does,
@@ -86,6 +106,25 @@ export default defineComponent({
       trackPublication.on('subscribed', displayTrack);
     };
 
+    const startAudioRecorder = (audioStream: MediaStreamTrack) => {
+      const mediaStream = new MediaStream();
+      mediaStream.addTrack(audioStream);
+      recorder.start();
+      const mediaRecorder = new MediaRecorder(mediaStream);
+      console.log(mediaRecorder);
+      const audioChunks: any = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        console.log(event.data);
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      // Start recording
+      mediaRecorder.start();
+    };
+
     const handleDisconnectedParticipant = (participant: any) => {
       // stop listening for this participant
       participant.removeAllListeners();
@@ -95,6 +134,8 @@ export default defineComponent({
       ) as HTMLElement;
       participantDiv.remove();
     };
+
+    // const createAudioRecorder = (audioTrack: any) => {};
 
     const joinRoom = async () => {
       if (!localStorage.getItem('TwilioToken')) {
@@ -161,7 +202,14 @@ export default defineComponent({
         });
     };
 
-    return { url, roomName, joinRoom, disconnectRoom, createAndJoinRoom };
+    return {
+      url,
+      roomName,
+      joinRoom,
+      disconnectRoom,
+      createAndJoinRoom,
+      recorder,
+    };
   },
   methods: {
     redirectToHome() {
