@@ -3,6 +3,11 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>{{ $route.matched[0].name }}</q-toolbar-title>
+        <q-btn href="/myaccount" flat round>
+          <q-avatar color="pink" text-color="white" style="cursor: pointer">{{
+            username
+          }}</q-avatar>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -51,6 +56,7 @@
 import { defineComponent, ref } from 'vue';
 import { useRecorderStore } from 'src/stores/recorder';
 import { ScriptCompileContext } from 'vue/compiler-sfc';
+import { usePageStore } from 'src/stores/page';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -118,6 +124,9 @@ export default defineComponent({
 
     return {
       soundBars,
+      username: ref(
+        localStorage.getItem('username')?.slice(0, 2)?.toUpperCase() ?? '?'
+      ),
     };
   },
 });

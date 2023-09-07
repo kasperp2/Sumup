@@ -24,6 +24,7 @@ import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
+import { usePageStore } from 'src/stores/page';
 
 export default defineComponent({
   name: 'LoginPage',
@@ -52,12 +53,13 @@ export default defineComponent({
         })
         .then((response) => {
           Cookies.set('token', response.data.token);
+          localStorage.setItem('username', username.value);
 
           // Redirect to home page using router
           router.push('/');
         })
         .catch((error) => {
-          if (error.response.data.status === 'failed') {
+          if (error.response?.data?.status === 'failed') {
             if (error.response.data.errorCode === 'FAILED_TO_FETCH_USER') {
               errorMessage.value = 'Wrong Password or Username'; // Update error message
             } else if (error.response.data.errorCode === 'BAD_CREDENTIALS') {

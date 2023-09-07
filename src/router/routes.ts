@@ -1,3 +1,4 @@
+import { Cookies } from 'quasar';
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
@@ -24,6 +25,14 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('layouts/LoginLayout.vue'),
     children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
+  },
+  {
+    path: '/myaccount',
+    name: 'MyAccount',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/MyAccountPage.vue') },
+    ],
   },
   {
     path: '/joinRoom',

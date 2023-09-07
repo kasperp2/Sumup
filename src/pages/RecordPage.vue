@@ -9,7 +9,20 @@
     <Transition name="fall-in">
       <div v-if="recorder.current" class="m-5">
         <div class="text-h5">
-          <input v-model="recorder.name" class="border-none outline-none" />
+          <div style="display: flex; flex-direction: column">
+            <span
+              v-if="!recorder.name.trim()"
+              style="font-size: small"
+              class="text-red-500"
+            >
+              {{ !recorder.name.trim() ? 'Name cannot be empty' : '' }}
+            </span>
+            <input
+              v-model="recorder.name"
+              class="border-none outline-none"
+              placeholder="Name"
+            />
+          </div>
         </div>
 
         <div class="p-5">
@@ -24,7 +37,7 @@
           <q-btn @click="recorder.clear()" rounded color="negative"
             >clear<q-icon class="ml-2" name="backspace"
           /></q-btn>
-          <q-btn @click="recorder.save()" rounded color="positive"
+          <q-btn @click="clicksave()" rounded color="positive"
             >save<q-icon class="ml-2" name="upload"
           /></q-btn>
         </div>
@@ -33,8 +46,8 @@
           <RecordListItem
             v-for="item in items"
             :key="item.id"
-            :title="item.title"
-            :date="item.date"
+            :title="item.name"
+            :date="item.createdDate"
             class="mb-4"
           />
         </q-scroll-area>
@@ -48,6 +61,8 @@ import { defineComponent, ref } from 'vue';
 import RecordListItem from '/src/components/RecordListItemComponent.vue';
 import { usePageStore } from 'src/stores/page';
 import { useRecorderStore } from 'src/stores/recorder';
+import { api } from 'boot/axios';
+import { Cookies } from 'quasar';
 
 export default defineComponent({
   name: 'RecordPage',
@@ -59,18 +74,29 @@ export default defineComponent({
 
     interface Item {
       id: number;
-      title: string;
-      date: string;
+      name: string;
+      createdDate: string;
     }
 
     const items = ref<Item[]>([]);
 
-    for (let i = 0; i < 10; i++) {
-      items.value.push({
-        id: i,
-        title: `Title ${i}`,
-        date: `Date ${i}`,
-      });
+    async function clicksave() {
+      await recorder.save();
+      getitems();
+    }
+    getitems();
+
+    function getitems() {
+      api
+        .get('/api/transcript', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${Cookies.get('token')}`,
+          },
+        })
+        .then((response) => {
+          items.value = response.data.transcripts;
+        });
     }
 
     // AUDIO RECORDING
@@ -79,6 +105,7 @@ export default defineComponent({
     return {
       items,
       recorder,
+      clicksave,
     };
   },
 });
