@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-row md:flex-col items-center justify-evenly">
+  <q-page class="flex flex-row md:flex-col items-center justify-center">
     <div class="flex flex-row items-center justify-center">
       <img :src="url" class="w-32 h-32" />
       <div class="text-h1">MeetBrief</div>
@@ -7,10 +7,10 @@
 
     <div id="video-container"></div>
 
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2 mt-10" id="btnDiv">
+      <q-input filled v-model="displayName" label="Display Name:" />
       <q-input filled v-model="roomName" label="Room Name:" />
       <q-btn @click="joinRoom" label="Join room" class="w-64" />
-      <q-btn @click="disconnectRoom" label="Disconnect room" class="w-64" />
       <q-btn @click="createAndJoinRoom" label="Create room" class="w-64" />
     </div>
   </q-page>
@@ -34,6 +34,7 @@ export default defineComponent({
     const url = '/src/assets/logo.png';
 
     let roomName = ref('');
+    let displayName = ref('');
     let room = ref(null) as any;
 
     const router = useRouter(); // Get the router instance
@@ -50,6 +51,8 @@ export default defineComponent({
       // create a div for this participant's tracks
       const participantDiv = document.createElement('div');
       participantDiv.setAttribute('id', participant.identity);
+      const btndiv = document.getElementById('btnDiv') as HTMLElement;
+      btndiv.style.display = 'none';
       container.appendChild(participantDiv);
 
       // iterate through the participant's published tracks and
@@ -161,7 +164,14 @@ export default defineComponent({
         });
     };
 
-    return { url, roomName, joinRoom, disconnectRoom, createAndJoinRoom };
+    return {
+      url,
+      roomName,
+      displayName,
+      joinRoom,
+      disconnectRoom,
+      createAndJoinRoom,
+    };
   },
   methods: {
     redirectToHome() {

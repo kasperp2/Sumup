@@ -12,6 +12,8 @@ import { api } from 'src/boot/axios';
 
 import { useRecorderStore } from 'src/stores/recorder';
 
+import { useRecorderStore } from 'src/stores/recorder';
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;

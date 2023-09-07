@@ -3,23 +3,33 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>{{ $route.matched[0].name }}</q-toolbar-title>
+        <q-btn href="/myaccount" flat round>
+          <q-avatar color="pink" text-color="white" style="cursor: pointer">{{
+            username
+          }}</q-avatar>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
     <q-footer bordered class="bg-grey-3 text-primary">
-      <component
-        to="/record"
-        :class="{ 'record-btn': true, recording: recorder.isListining }"
-        :is="onRecordPage ? 'span' : 'router-link'"
-        @click="clickRecord"
-      >
+      <transition name="fall-down">
         <div
-          class="sound-bar"
-          v-for="(bar, i) in soundBars"
-          :key="i"
-          :style="{ height: bar + 'px' }"
-        ></div>
-      </component>
+          v-if="showRecordBtn"
+          :class="{
+            'record-btn': true,
+            recording: recorder.isListining,
+            unavalible: true,
+          }"
+          @click="clickRecord"
+        >
+          <div
+            class="sound-bar"
+            v-for="(bar, i) in soundBars"
+            :key="i"
+            :style="{ height: bar + 'px' }"
+          ></div>
+        </div>
+      </transition>
 
       <q-tabs
         no-caps
@@ -77,6 +87,46 @@ export default defineComponent({
       for (let i = 0; i < 10; i++) {
         soundBars.value.push(0);
       }
+    };
+
+    resetSoundBars();
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+
+      analyser.smoothingTimeConstant = 0.8;
+      analyser.fftSize = 1024;
+
+      microphone.connect(analyser);
+      analyser.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+      scriptProcessor.onaudioprocess = () => {
+        if (!useRecorderStore().isListining) {
+          resetSoundBars();
+          return;
+        }
+
+        const array = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+        const arraySum = array.reduce((a, value) => a + value, 0);
+        const average = arraySum / array.length;
+
+        let value = Math.round(average + 2);
+        value = value > 100 ? 100 : value;
+
+        soundBars.value.push(value);
+        soundBars.value.shift();
+      };
+    });
+
+    return {
+      soundBars,
+      username: ref(
+        localStorage.getItem('username')?.slice(0, 2)?.toUpperCase() ?? '?'
+      ),
     };
 
     resetSoundBars();

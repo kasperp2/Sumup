@@ -83,13 +83,7 @@ export default defineComponent({
         })
         .then((response) => {
           items.value = response.data.transcripts;
-          console.log(items.value);
         });
-    }
-
-    // TODO: onLoad function
-    function onLoad() {
-      console.log('load');
     }
 
     // AUDIO RECORDING

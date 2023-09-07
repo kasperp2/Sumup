@@ -33,18 +33,6 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/JoinRoomPage.vue') }],
   },
   {
-    path: '/myaccount',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/MyAccountPage.vue') },
-    ],
-  },
-  {
-    path: '/joinRoom',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/JoinRoomPage.vue') }],
-  },
-  {
     path: '/createRoom',
     component: () => import('layouts/MainLayout.vue'),
     children: [

@@ -24,6 +24,7 @@ import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
+import { usePageStore } from 'src/stores/page';
 
 export default defineComponent({
   name: 'LoginPage',
@@ -53,6 +54,7 @@ export default defineComponent({
         .then((response) => {
           console.log(response.data);
           Cookies.set('token', response.data.token);
+          localStorage.setItem('username', username.value);
 
           // Redirect to home page using router
           router.push('/');
