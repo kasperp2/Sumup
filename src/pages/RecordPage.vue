@@ -97,7 +97,6 @@ export default defineComponent({
 
     return {
       items,
-      onLoad,
       recorder,
       clicksave,
     };
