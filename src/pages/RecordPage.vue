@@ -9,7 +9,20 @@
     <Transition name="fall-in">
       <div v-if="recorder.current" class="m-5">
         <div class="text-h5">
-          <input v-model="recorder.name" class="border-none outline-none" />
+          <div style="display: flex; flex-direction: column">
+            <span
+              v-if="!recorder.name.trim()"
+              style="font-size: small"
+              class="text-red-500"
+            >
+              {{ !recorder.name.trim() ? 'Name cannot be empty' : '' }}
+            </span>
+            <input
+              v-model="recorder.name"
+              class="border-none outline-none"
+              placeholder="Name"
+            />
+          </div>
         </div>
 
         <div class="p-5">
