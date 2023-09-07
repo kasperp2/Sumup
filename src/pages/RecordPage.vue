@@ -9,7 +9,12 @@
     <Transition name="fall-in">
       <div v-if="recorder.current" class="m-5">
         <div class="text-h5">
-          <input v-model="recorder.name" class="border-none outline-none" />
+          <div style="display: flex; flex-direction: column">
+            <span v-if="!recorder.name.trim()" style="font-size: small" class="text-red-500">
+              {{ !recorder.name.trim() ? 'Name cannot be empty' : '' }}
+            </span>
+            <input v-model="recorder.name" class="border-none outline-none" placeholder="Name" />
+          </div>
         </div>
 
         <div class="p-5">
@@ -60,7 +65,6 @@ export default defineComponent({
 
     async function clicksave() {
       await recorder.save();
-      getitems();
     }
     getitems();
 
@@ -74,13 +78,7 @@ export default defineComponent({
         })
         .then((response) => {
           items.value = response.data.transcripts;
-          console.log(items.value);
         });
-    }
-
-    // TODO: onLoad function
-    function onLoad() {
-      console.log('load');
     }
 
     // AUDIO RECORDING
@@ -88,7 +86,6 @@ export default defineComponent({
 
     return {
       items,
-      onLoad,
       recorder,
       clicksave,
     };
