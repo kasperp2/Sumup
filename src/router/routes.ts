@@ -27,6 +27,14 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
   },
   {
+    path: '/myaccount',
+    name: 'MyAccount',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/MyAccountPage.vue') },
+    ],
+  },
+  {
     path: '/joinRoom',
     name: 'Join Room',
     component: () => import('layouts/MainLayout.vue'),
@@ -37,14 +45,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/CreateRoomPage.vue') },
-    ],
-  },
-  {
-    path: '/myaccount',
-    name: 'MyAccount',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/MyAccountPage.vue') },
     ],
   },
 
