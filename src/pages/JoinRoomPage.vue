@@ -97,24 +97,24 @@ export default defineComponent({
     };
 
     const joinRoom = async () => {
-      // if (!localStorage.getItem('TwilioToken')) {
-      await api
-        .get('/api/joinRoom', {
-          params: {
-            roomName: roomName.value,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + Cookies.get('token'),
-          },
-        })
-        .then((response) => {
-          localStorage.setItem('TwilioToken', response.data.twilioToken);
-        })
-        .catch((error) => {
-          console.log('Error', error.response);
-        });
-      // }
+      if (!localStorage.getItem('TwilioToken')) {
+        await api
+          .get('/api/joinRoom', {
+            params: {
+              roomName: roomName.value,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + Cookies.get('token'),
+            },
+          })
+          .then((response) => {
+            localStorage.setItem('TwilioToken', response.data.twilioToken);
+          })
+          .catch((error) => {
+            console.log('Error', error.response);
+          });
+      }
 
       // find or create a room with the given roomName
       const room = await connectRoom(
