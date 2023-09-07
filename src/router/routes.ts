@@ -41,6 +41,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/myaccount',
+    name: 'MyAccount',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/MyAccountPage.vue') },
