@@ -289,7 +289,7 @@ export default defineComponent({
       console.log(recorder.isListining);
       if (recorder?.isListining && conv != null) {
         console.log('conv', conv);
-        conv.sendMessage(recorder.current);
+        conv.sendMessage(recorder.currentTranslate);
       }
     }
 
