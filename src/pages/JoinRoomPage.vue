@@ -33,6 +33,15 @@
       />
       <q-btn @click="createRoom" label="Create room" class="w-64 beforeJoin" />
     </div>
+
+    <div id="chat">
+      <div id="chat-scroll">
+        <div id="chat-content">
+          <!-- chat content will be added dynamically here -->
+        </div>
+      </div>
+      <input id="chat-input" type="text" />
+    </div>
   </q-page>
 </template>
 
@@ -42,14 +51,17 @@ import { api } from 'src/boot/axios';
 import { Cookies } from 'quasar';
 import { useRouter } from 'vue-router'; // Import the useRouter function
 import { connect } from 'twilio-video';
+import { Client } from '@twilio/conversations';
+import { useRecorderStore } from 'src/stores/recorder';
 
 export default defineComponent({
   name: 'JoinRoomPage',
   components: {},
   mounted() {
-    const isRoomCreated = this.$route.query.joinRoom == 'true';
+    let isRoomCreated = this.$route.query.joinRoom == 'true';
     const roomName = this.$route.query.roomName as string;
-    if (isRoomCreated) {
+    if (isRoomCreated && roomName != '') {
+      this.$route.query.joinRoom = 'false';
       this.joinRoom(roomName);
     }
   },
@@ -57,10 +69,22 @@ export default defineComponent({
     let container = null as any;
     let beforeJoin = null as any;
     let afterJoin = null as any;
+    let chat = null as any;
+    let conv = null as any;
+    let chatScroll = null as any;
+    let chatContent = null as any;
+    let chatInput = null as any;
+    let conversationSid = null as any;
+    let recorder = null as any;
+    let intervalId = null as any;
+    let chatMsg = '';
     onMounted(() => {
       container = document.getElementById('video-container') as HTMLElement;
       beforeJoin = document.getElementsByClassName('beforeJoin');
       afterJoin = document.getElementsByClassName('afterJoin');
+      chatScroll = document.getElementById('chat-scroll');
+      chatContent = document.getElementById('chat-content');
+      chatInput = document.getElementById('chat-input');
     });
     const url = '/src/assets/logo.png';
 
@@ -137,25 +161,29 @@ export default defineComponent({
     };
 
     const joinRoom = async (joinRoomName = roomName.value) => {
-      if (!localStorage.getItem('TwilioToken')) {
-        await api
-          .get('/api/joinRoom', {
-            params: {
-              roomName: joinRoomName,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + Cookies.get('token'),
-            },
-          })
-          .then((response) => {
-            localStorage.setItem('TwilioToken', response.data.twilioToken);
-          })
-          .catch((error) => {
-            console.log('Error', error.response);
-          });
-      }
-
+      // if (!localStorage.getItem('TwilioToken')) {
+      await api
+        .get('/api/joinRoom', {
+          params: {
+            roomName: joinRoomName,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + Cookies.get('token'),
+          },
+        })
+        .then((response) => {
+          localStorage.setItem('TwilioToken', response.data.twilioToken);
+          conversationSid = response.data.conversationSid;
+          // AUDIO RECORDING
+          recorder = useRecorderStore();
+          recorder.start();
+          console.log(conversationSid);
+        })
+        .catch((error) => {
+          console.log('Error', error.response);
+        });
+      // }
       // find or create a room with the given roomName
       const room = await connectRoom(
         joinRoomName,
@@ -167,19 +195,106 @@ export default defineComponent({
       room.participants.forEach(handleConnectedParticipant);
       room.on('participantConnected', handleConnectedParticipant);
 
+      const friendlyName = joinRoomName + ' Chat';
+
       // handle cleanup when a participant disconnects
       room.on('participantDisconnected', handleDisconnectedParticipant);
       window.addEventListener('beforeunload', () => room.disconnect());
+      connectChat(
+        localStorage.getItem('TwilioToken') as string,
+        friendlyName,
+        room.localParticipant
+      );
+
+      // Start the continuous execution
+      intervalId = setInterval(sendMessagesContinuously, intervalMilliseconds);
     };
+
+    function connectChat(token: any, friendlyName: string, participant: any) {
+      const client = new Client(token);
+      const uniqueName = friendlyName.replace(/\s+/g, '-').toLowerCase();
+      console.log(uniqueName);
+      client.on('initialized', async () => {
+        try {
+          await client
+            .getConversationByUniqueName(uniqueName)
+            .then(async (_conv) => {
+              console.log(_conv);
+              conv = _conv;
+              await conv.add(participant.identity);
+              conv.on('messageAdded', (message) => {
+                addMessageToChat(message.author, message.body);
+              });
+              conv.getMessages().then((messages) => {
+                console.log(messages);
+                chatContent.innerHTML = '';
+                for (let i = 0; i < messages.items.length; i++) {
+                  addMessageToChat(
+                    messages.items[i].author,
+                    messages.items[i].body
+                  );
+                }
+              });
+            });
+        } catch (error) {
+          console.log('error', error);
+          try {
+            await client
+              .createConversation({
+                friendlyName: friendlyName,
+                uniqueName: uniqueName,
+              })
+              .then(async (_conv) => {
+                console.log(_conv);
+                conv = _conv;
+                await conv.add(participant.identity);
+                conv.on('messageAdded', (message) => {
+                  addMessageToChat(message.author, message.body);
+                });
+                conv.getMessages().then((messages) => {
+                  console.log(messages);
+                  chatContent.innerHTML = '';
+                  for (let i = 0; i < messages.items.length; i++) {
+                    addMessageToChat(
+                      messages.items[i].author,
+                      messages.items[i].body
+                    );
+                  }
+                });
+              });
+          } catch (error) {
+            console.log('error', error);
+          }
+        }
+      });
+    }
+
+    function addMessageToChat(user: any, message: any) {
+      chatMsg = message;
+      chatContent.innerHTML = `<p><b>${user}</b>: ${chatMsg}</p>`;
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+    }
 
     const disconnectRoom = () => {
       room.disconnect();
+      clearInterval(intervalId);
       router.push('/');
     };
 
     const createRoom = () => {
       router.push('/createRoom');
     };
+
+    function sendMessagesContinuously() {
+      console.log(recorder.isListining);
+      if (recorder?.isListining && conv != null) {
+        console.log('conv', conv);
+        conv.sendMessage(recorder.current);
+      }
+    }
+
+    // Specify the interval (in milliseconds) at which you want to call sendMessagesContinuously
+    const intervalMilliseconds = 500; // 1000ms = 1 second
 
     return {
       url,
